@@ -22,8 +22,11 @@ app.add_middleware(
 init_db()
 
 # Register routers
+from .routers import students, auth
+app.include_router(auth.router)
 app.include_router(opportunities.router)
 app.include_router(courses.router)
+app.include_router(students.router)
 
 # Setup sqladmin
 admin = Admin(app, engine, title="Mentoria Hub Admin")

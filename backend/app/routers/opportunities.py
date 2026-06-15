@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 from datetime import date
 from typing import Optional, List
 from ..database import get_db
@@ -78,3 +78,24 @@ def unsave_opportunity(opportunity_id: int, student_id: int, db: Session = Depen
     db.delete(saved)
     db.commit()
     return {"status": "unsaved"}
+
+@router.get("/{student_id}/recommended", response_model=List[OpportunitySchema])
+def get_recommended_opportunities(student_id: int, db: Session = Depends(get_db)):
+    student = db.query(StudentProfile).filter(StudentProfile.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # Get opportunities matching student's interests
+    if not student.interests:
+        return db.query(Opportunity).order_by(Opportunity.deadline).all()
+
+    interests = student.interests.split(",")
+    query = db.query(Opportunity)
+
+    for interest in interests:
+        query = query.filter(or_(
+            Opportunity.tags.contains(interest.strip()),
+            Opportunity.direction.contains(interest.strip())
+        ))
+
+    return query.order_by(Opportunity.deadline).all()

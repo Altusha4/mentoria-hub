@@ -97,3 +97,24 @@ def get_lesson(lesson_id: int, db: Session = Depends(get_db)):
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson not found")
     return lesson
+
+@router.get("/{student_id}/recommended", response_model=List[CourseSchema])
+def get_recommended_courses(student_id: int, db: Session = Depends(get_db)):
+    student = db.query(StudentProfile).filter(StudentProfile.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # Get courses matching student's interests
+    if not student.interests:
+        return db.query(Course).all()
+
+    interests = student.interests.split(",")
+    query = db.query(Course)
+
+    for interest in interests:
+        query = query.filter(or_(
+            Course.tags.contains(interest.strip()),
+            Course.title.contains(interest.strip())
+        ))
+
+    return query.all()
