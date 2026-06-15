@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from typing import Optional, List
 from ..database import get_db
 from ..models import Course, Lesson, Enrollment, StudentProfile, LessonProgress
