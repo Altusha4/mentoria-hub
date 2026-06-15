@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../utils/api';
+import MathCaptcha from '../components/MathCaptcha';
 
 export default function Register({ setStudentId }) {
   const navigate = useNavigate();
@@ -8,11 +9,13 @@ export default function Register({ setStudentId }) {
     email: '',
     first_name: '',
     last_name: '',
+    password: '',
     grade: '10',
     interests: [],
     subjects: [],
     goals: '',
   });
+  const [captchaVerified, setCaptchaVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -141,6 +144,19 @@ export default function Register({ setStudentId }) {
             </div>
 
             <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">Password *</label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="••••••••"
+              />
+              <p className="text-xs text-gray-500 mt-1">Minimum 6 characters recommended</p>
+            </div>
+
+            <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Grade Level *</label>
               <select
                 value={formData.grade}
@@ -208,10 +224,15 @@ export default function Register({ setStudentId }) {
             />
           </div>
 
+          {/* Captcha */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <MathCaptcha onVerify={setCaptchaVerified} />
+          </div>
+
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaVerified}
             className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Creating account...' : 'Create Account & Start Learning'}
