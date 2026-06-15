@@ -12,10 +12,18 @@ export default function Login({ setStudentId }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+
+    console.log('📝 [LOGIN] Form submitted');
+    console.log(`📝 [LOGIN] Email: ${email}`);
+
     setLoading(true);
 
     try {
+      console.log('📤 [LOGIN] Sending login request...');
       const response = await api.login(email, password);
+
+      console.log('✅ [LOGIN] Login successful!');
+      console.log('📥 [LOGIN] Response:', response);
 
       // Save access token in memory (sessionStorage for security)
       sessionStorage.setItem('accessToken', response.access_token);
@@ -24,14 +32,17 @@ export default function Login({ setStudentId }) {
       sessionStorage.setItem('studentId', response.student_id);
       sessionStorage.setItem('studentName', response.name);
 
+      console.log('💾 [LOGIN] Saved to sessionStorage');
+
       // Set state
       setStudentId(response.student_id);
 
+      console.log('✅ [LOGIN] Redirecting to home...');
       // Redirect to home
       navigate('/');
     } catch (err) {
+      console.error('❌ [LOGIN] Error:', err);
       setError('Login failed. Please check your email and password.');
-      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }

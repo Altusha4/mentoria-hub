@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 
 // Helper to add Authorization header
 const getHeaders = (token = null) => {
@@ -12,14 +12,29 @@ const getHeaders = (token = null) => {
 export const api = {
   // Auth
   register: async (data) => {
+    console.log('🌐 [API] Sending register request to', `${API_BASE_URL}/auth/register`);
+    console.log('🌐 [API] Payload:', data);
+
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: getHeaders(),
       credentials: 'include', // Send cookies
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error('Registration failed');
-    return response.json();
+
+    console.log('🌐 [API] Register response status:', response.status);
+    console.log('🌐 [API] Register response ok:', response.ok);
+
+    const responseData = await response.json();
+    console.log('🌐 [API] Register response body:', responseData);
+
+    if (!response.ok) {
+      console.error('❌ [API] Register failed:', responseData);
+      throw new Error(responseData.detail || 'Registration failed');
+    }
+
+    console.log('✅ [API] Register successful');
+    return responseData;
   },
 
   login: async (email, password) => {
