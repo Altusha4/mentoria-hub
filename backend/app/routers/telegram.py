@@ -98,15 +98,13 @@ def get_categories(db: Session = Depends(get_db)):
     """Получить все доступные категории с количеством постов"""
     from sqlalchemy import func
 
-    categories = db.query(
-        TelegramPost.category,
+    result = db.query(
+        TelegramPost.category.label("name"),
         func.count(TelegramPost.id).label("count")
     ).group_by(TelegramPost.category).all()
 
     return {
-        "categories": [
-            {"name": cat, "count": count} for cat, count in categories
-        ]
+        "categories": [{"name": row.name, "count": row.count} for row in result]
     }
 
 @router.patch("/posts/{post_id}/category")

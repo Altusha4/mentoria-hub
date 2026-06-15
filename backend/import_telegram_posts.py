@@ -82,11 +82,26 @@ def detect_category(text):
 
     return "general"
 
-
 async def import_posts():
-    print(f"🔐 Подключаюсь к Telegram...")
+    print(f"🔐 Подключаюсь к Telegram с использованием сохранённой сессии...")
 
-    async with TelegramClient('session', API_ID, API_HASH) as client:
+    client = TelegramClient('session', API_ID, API_HASH)
+    try:
+        # Подключаемся с существующей сессией
+        await client.connect()
+
+        # Если нет авторизации - не продолжаем
+        is_authorized = await client.is_user_authorized()
+        if not is_authorized:
+            print("⚠️  Сессия истекла. Нужна переавторизация через интерактивный ввод")
+            await client.start()
+
+    except Exception as e:
+        print(f"❌ Ошибка подключения: {e}")
+        await client.disconnect()
+        return
+
+    async with client:
         print(f"✅ Подключился! Загружаю посты из @{CHANNEL_USERNAME}...")
 
         db = SessionLocal()
@@ -121,12 +136,13 @@ async def import_posts():
                 if message.photo:
                     image_url = f"https://t.me/{CHANNEL_USERNAME}/{message.id}"
 
-                # Создаем пост (без OpenAI)
+                # Создаем пост
                 post = TelegramPost(
                     telegram_message_id=message.id,
                     title=title,
                     content=content,
                     category=category,
+                    image_url=image_url,
                     posted_at=message.date
                 )
 
