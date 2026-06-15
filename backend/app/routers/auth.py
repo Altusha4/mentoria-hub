@@ -46,7 +46,7 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
     print(f"✅ [REGISTER] Email {student.email} is free")
 
     # Create new student with hashed password
-    student_dict = student.dict()
+    student_dict = student.dict(exclude_unset=True)
     password = student_dict.pop("password")
     print(f"🔐 [REGISTER] Hashing password for {student.email}...")
 
@@ -54,7 +54,22 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
     avatar_emoji = generate_avatar_emoji()
     print(f"🎨 [REGISTER] Generated avatar: {avatar_emoji}")
 
-    db_student = StudentProfile(**student_dict, password_hash=hash_password(password), avatar_emoji=avatar_emoji)
+    # Add default values for optional fields
+    db_student = StudentProfile(
+        **student_dict,
+        password_hash=hash_password(password),
+        avatar_emoji=avatar_emoji,
+        gpa=None,
+        ielts_score=None,
+        toefl_score=None,
+        sat_score=None,
+        activities=None,
+        certificates=None,
+        cv_text=None,
+        cv_video_url=None,
+        motivation_letter=None,
+        transcript_url=None
+    )
     print(f"💾 [REGISTER] Adding student to DB: {student.email}")
 
     db.add(db_student)
