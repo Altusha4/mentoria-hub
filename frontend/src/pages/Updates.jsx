@@ -10,26 +10,25 @@ const cleanContent = (text) => {
     .replace(/`{1,3}([^`]+)`{1,3}/g, '$1');
 };
 
-const truncateText = (text, limit = 150) => {
+const truncateText = (text, limit = 100) => {
   if (!text) return '';
   if (text.length <= limit) return text;
   return text.substring(0, limit).trim() + '...';
 };
 
 const CATEGORY_LABELS = {
-  hiring: { emoji: '💼', label: 'Hiring' },
-  programs: { emoji: '📚', label: 'Programs' },
-  opportunities: { emoji: '🎯', label: 'Opportunities' },
-  news: { emoji: '📢', label: 'News' },
-  tips: { emoji: '💡', label: 'Tips' },
-  general: { emoji: '⭐', label: 'General' },
+  hiring: { emoji: '💼', label: 'Hiring', color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' },
+  programs: { emoji: '📚', label: 'Programs', color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800' },
+  opportunities: { emoji: '🎯', label: 'Opportunities', color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' },
+  news: { emoji: '📢', label: 'News', color: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800' },
+  tips: { emoji: '💡', label: 'Tips', color: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' },
+  general: { emoji: '⭐', label: 'General', color: 'bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800' },
 };
 
 export default function Updates() {
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   useEffect(() => {
@@ -37,14 +36,13 @@ export default function Updates() {
   }, []);
 
   useEffect(() => {
-    setCurrentIndex(0);
     fetchPostsByCategory(selectedCategory);
   }, [selectedCategory]);
 
   const fetchData = async () => {
     try {
       const [postsData, categoriesData] = await Promise.all([
-        api.getTelegramPosts(100),
+        api.getTelegramPosts(126),
         api.getTelegramCategories(),
       ]);
       setPosts(postsData);
@@ -58,279 +56,133 @@ export default function Updates() {
 
   const fetchPostsByCategory = async (category) => {
     try {
-      const data = await api.getTelegramPosts(100, category === 'all' ? null : category);
+      const data = await api.getTelegramPosts(126, category === 'all' ? null : category);
       setPosts(data);
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
   };
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % posts.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + posts.length) % posts.length);
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin text-4xl mb-4">🔄</div>
-          <p className="text-white text-lg">Loading updates...</p>
+          <div className="animate-spin text-5xl mb-4">🔄</div>
+          <p className="text-gray-700 dark:text-gray-300 text-lg">Loading updates...</p>
         </div>
       </div>
     );
   }
-
-  if (posts.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-white text-xl">No updates available</p>
-        </div>
-      </div>
-    );
-  }
-
-  const currentPost = posts[currentIndex];
-  const postCategory = CATEGORY_LABELS[currentPost.category] || CATEGORY_LABELS.general;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-white dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="mb-10">
+          <div className="flex items-center gap-3 mb-3">
             <span className="text-5xl">📢</span>
             <div>
-              <h1 className="text-4xl sm:text-5xl font-bold">Latest Updates</h1>
-              <p className="text-slate-400 text-lg">From @mentoria_updates</p>
+              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white">Latest Updates</h1>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">From @mentoria_updates — {posts.length} posts</p>
             </div>
-          </div>
-          <div className="text-sm text-slate-400">
-            {currentIndex + 1} / {posts.length} posts
           </div>
         </div>
 
-        {/* Category Tabs */}
-        <div className="mb-12 overflow-x-auto pb-3">
-          <div className="flex gap-2 min-w-min">
+        {/* Category Filter */}
+        <div className="mb-10">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-4 py-2 rounded-full font-semibold transition-all whitespace-nowrap ${
+              className={`px-4 py-2 rounded-full font-semibold transition-all ${
                 selectedCategory === 'all'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                  : 'bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600'
               }`}
             >
-              All Posts
+              All ({posts.length})
             </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => setSelectedCategory(cat.name)}
-                className={`px-4 py-2 rounded-full font-semibold transition-all whitespace-nowrap flex items-center gap-2 ${
-                  selectedCategory === cat.name
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
-                }`}
-              >
-                <span>{CATEGORY_LABELS[cat.name]?.emoji}</span>
-                {CATEGORY_LABELS[cat.name]?.label} ({cat.count})
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const label = CATEGORY_LABELS[cat.name];
+              return (
+                <button
+                  key={cat.name}
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className={`px-4 py-2 rounded-full font-semibold transition-all flex items-center gap-2 ${
+                    selectedCategory === cat.name
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-slate-700 text-gray-900 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  <span>{label?.emoji}</span>
+                  {label?.label} ({cat.count})
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Main Carousel */}
-        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 border border-slate-700 overflow-hidden mb-12 shadow-2xl">
-          {/* Category Badge */}
-          <div className="mb-6 inline-block bg-slate-700 px-4 py-2 rounded-full">
-            <span className="text-2xl">{postCategory.emoji}</span>
-            <span className="ml-2 font-semibold">{postCategory.label}</span>
+        {/* Posts Grid */}
+        {posts.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-gray-600 dark:text-gray-400 text-xl">No updates available</p>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {posts.map((post) => {
+              const label = CATEGORY_LABELS[post.category] || CATEGORY_LABELS.general;
+              return (
+                <div
+                  key={post.id}
+                  className={`rounded-xl border-2 p-5 transition-all hover:shadow-lg hover:scale-105 ${label.color}`}
+                >
+                  {/* Category Badge */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">{label.emoji}</span>
+                    <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                      {label.label}
+                    </span>
+                  </div>
 
-          {/* Post Content - Horizontal Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            {/* Image - Left */}
-            <div className="lg:col-span-1">
-              {currentPost.image_url ? (
-                <div className="rounded-lg overflow-hidden h-64 bg-slate-700">
-                  <img
-                    src={currentPost.image_url}
-                    alt={currentPost.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextElementSibling.style.display = 'flex';
-                    }}
-                  />
-                  <div className="hidden w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 items-center justify-center">
-                    <span className="text-5xl">📸</span>
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 line-clamp-3">
+                    {cleanContent(post.title)}
+                  </h3>
+
+                  {/* Content Preview */}
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 line-clamp-2">
+                    {cleanContent(truncateText(post.content, 120))}
+                  </p>
+
+                  {/* Footer */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-300 dark:border-gray-600">
+                    <span className="text-xs text-gray-500 dark:text-gray-500">
+                      {new Date(post.posted_at).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
+                    <a
+                      href="https://t.me/mentoria_updates"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    >
+                      Read →
+                    </a>
                   </div>
                 </div>
-              ) : (
-                <div className="rounded-lg h-64 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                  <span className="text-5xl">📸</span>
-                </div>
-              )}
-            </div>
-
-            {/* Text & Summary - Right */}
-            <div className="lg:col-span-2 flex flex-col justify-between min-h-64">
-              {currentPost.title && (
-                <h2 className="text-3xl font-bold mb-4">{cleanContent(currentPost.title)}</h2>
-              )}
-
-              <p className="text-slate-300 text-lg leading-relaxed mb-6">
-                {truncateText(cleanContent(currentPost.content), 200)}
-              </p>
-
-              {/* AI Summary */}
-              {currentPost.summary && (
-                <div className="mb-6 p-4 bg-slate-700 rounded-lg border border-slate-600">
-                  <p className="text-slate-200 leading-relaxed">
-                    <span className="font-semibold text-blue-400">✨ Summary:</span> {currentPost.summary}
-                  </p>
-                </div>
-              )}
-
-              {/* Structured Metadata */}
-              {currentPost.post_info && (
-                <div className="mb-6 space-y-3">
-                  {(() => {
-                    try {
-                      const data = JSON.parse(currentPost.post_info);
-                      return (
-                        <>
-                          {data.audience && (
-                            <div className="flex items-start gap-2">
-                              <span className="text-lg">👥</span>
-                              <div>
-                                <p className="text-xs text-slate-400 font-semibold">Кому подойдет</p>
-                                <p className="text-slate-200">{data.audience}</p>
-                              </div>
-                            </div>
-                          )}
-                          {data.deadline && (
-                            <div className="flex items-start gap-2">
-                              <span className="text-lg">⏰</span>
-                              <div>
-                                <p className="text-xs text-slate-400 font-semibold">Дедлайн подачи</p>
-                                <p className="text-slate-200">{data.deadline}</p>
-                              </div>
-                            </div>
-                          )}
-                          {data.organizer && (
-                            <div className="flex items-start gap-2">
-                              <span className="text-lg">🏢</span>
-                              <div>
-                                <p className="text-xs text-slate-400 font-semibold">Организатор</p>
-                                <p className="text-slate-200">{data.organizer}</p>
-                              </div>
-                            </div>
-                          )}
-                          {data.format && (
-                            <div className="flex items-start gap-2">
-                              <span className="text-lg">📍</span>
-                              <div>
-                                <p className="text-xs text-slate-400 font-semibold">Формат</p>
-                                <p className="text-slate-200">{data.format}</p>
-                              </div>
-                            </div>
-                          )}
-                          {data.requirements && (
-                            <div className="flex items-start gap-2">
-                              <span className="text-lg">💼</span>
-                              <div>
-                                <p className="text-xs text-slate-400 font-semibold">Требования</p>
-                                <p className="text-slate-200">{data.requirements}</p>
-                              </div>
-                            </div>
-                          )}
-                          {data.benefits && (
-                            <div className="flex items-start gap-2">
-                              <span className="text-lg">🎁</span>
-                              <div>
-                                <p className="text-xs text-slate-400 font-semibold">Преимущества</p>
-                                <p className="text-slate-200">{data.benefits}</p>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      );
-                    } catch (e) {
-                      return null;
-                    }
-                  })()}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-700">
-                <div className="text-xs text-slate-400">
-                  {new Date(currentPost.posted_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
-
-                <a
-                  href="https://t.me/mentoria_updates"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Read in Telegram →
-                </a>
-              </div>
-            </div>
+              );
+            })}
           </div>
+        )}
 
-          {/* Navigation Buttons */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-6 top-1/2 transform -translate-y-1/2 bg-slate-700 hover:bg-slate-600 text-white p-3 rounded-full transition-all hover:scale-110 z-10"
-            aria-label="Previous post"
-          >
-            ←
-          </button>
-
-          <button
-            onClick={nextSlide}
-            className="absolute right-6 top-1/2 transform -translate-y-1/2 bg-slate-700 hover:bg-slate-600 text-white p-3 rounded-full transition-all hover:scale-110 z-10"
-            aria-label="Next post"
-          >
-            →
-          </button>
-        </div>
-
-        {/* Dots Indicator */}
-        <div className="flex justify-center gap-2 mb-12 flex-wrap">
-          {posts.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`rounded-full transition-all ${
-                index === currentIndex
-                  ? 'bg-blue-600 w-8 h-2'
-                  : 'bg-slate-600 w-2 h-2 hover:bg-slate-500'
-              }`}
-              aria-label={`Go to post ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Subscribe CTA */}
-        <div className="text-center">
+        {/* CTA */}
+        <div className="mt-16 text-center">
           <a
             href="https://t.me/mentoria_updates"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             Subscribe to @mentoria_updates
             <span>→</span>
