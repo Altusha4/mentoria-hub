@@ -5,6 +5,15 @@ from ..models import StudentProfile
 from ..schemas import StudentProfileCreate, StudentProfile as StudentProfileSchema
 from ..auth import create_access_token, create_refresh_token, verify_token, hash_password, verify_password
 from pydantic import BaseModel
+import random
+
+# DiceBear Avatars - free avatar generator
+AVATAR_STYLES = ['avataaars', 'personas', 'lorelei', 'fun-emoji']
+AVATAR_EMOJIS = ['👤', '😊', '🎓', '🚀', '⭐', '💼', '🎯', '🌟', '💡', '🏆', '🎨', '🧠']
+
+def generate_avatar_emoji() -> str:
+    """Generate random emoji avatar"""
+    return random.choice(AVATAR_EMOJIS)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -40,7 +49,11 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
     password = student_dict.pop("password")
     print(f"🔐 [REGISTER] Hashing password for {student.email}...")
 
-    db_student = StudentProfile(**student_dict, password_hash=hash_password(password))
+    # Generate random avatar emoji
+    avatar_emoji = generate_avatar_emoji()
+    print(f"🎨 [REGISTER] Generated avatar: {avatar_emoji}")
+
+    db_student = StudentProfile(**student_dict, password_hash=hash_password(password), avatar_emoji=avatar_emoji)
     print(f"💾 [REGISTER] Adding student to DB: {student.email}")
 
     db.add(db_student)

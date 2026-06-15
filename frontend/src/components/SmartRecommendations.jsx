@@ -28,12 +28,12 @@ export default function SmartRecommendations({ studentId, studentInterests }) {
         return;
       }
 
-      // Парсим интересы студента
+      // Parse student interests
       const interests = typeof studentInterests === 'string'
         ? studentInterests.split(',').map(i => i.trim()).filter(Boolean)
         : studentInterests;
 
-      // Получаем рекомендации
+      // Fetch recommendations
       const response = await fetch('http://localhost:8080/api/recommendations/get', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -82,10 +82,10 @@ export default function SmartRecommendations({ studentId, studentInterests }) {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">🤖</span>
-            <h2 className="text-3xl font-bold text-gray-900">Персональные рекомендации</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Personalized Recommendations</h2>
           </div>
           <p className="text-gray-600">
-            Специально подобрано на основе твоих интересов
+            Carefully selected based on your interests
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function SmartRecommendations({ studentId, studentInterests }) {
               {/* Footer */}
               <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                 <span className="text-xs text-gray-500">
-                  Релевантность: {(rec.score * 100).toFixed(0)}%
+                  Match: {(rec.score * 100).toFixed(0)}%
                 </span>
                 <a
                   href="https://t.me/mentoria_updates"
@@ -134,7 +134,7 @@ export default function SmartRecommendations({ studentId, studentInterests }) {
                   rel="noopener noreferrer"
                   className="text-xs font-semibold text-blue-600 hover:text-blue-700"
                 >
-                  Подробнее →
+                  Learn more →
                 </a>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function SmartRecommendations({ studentId, studentInterests }) {
             href="/updates"
             className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg"
           >
-            Смотреть все обновления →
+            View all updates →
           </a>
         </div>
       </div>

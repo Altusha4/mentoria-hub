@@ -7,7 +7,7 @@ import Opportunities from './pages/Opportunities';
 import Courses from './pages/Courses';
 import Course from './pages/Course';
 import Lesson from './pages/Lesson';
-import Profile from './pages/Profile';
+import ProfileNew from './pages/ProfileNew';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Search from './pages/Search';
@@ -79,7 +79,7 @@ export default function App() {
             />
             <Route
               path="/profile"
-              element={studentId ? <Profile studentId={studentId} /> : <Navigate to="/login" />}
+              element={studentId ? <ProfileNew studentId={studentId} /> : <Navigate to="/login" />}
             />
             <Route
               path="/search"
