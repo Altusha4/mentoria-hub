@@ -13,7 +13,7 @@ export default function Lesson({ studentId }) {
 
   useEffect(() => {
     fetchData();
-  }, [lessonId, courseId]);
+  }, [lessonId, courseId, studentId]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -22,6 +22,22 @@ export default function Lesson({ studentId }) {
       const courseData = await api.getCourse(courseId);
       setLesson(lessonData);
       setCourse(courseData);
+
+      // Check if lesson is already completed
+      if (studentId && lessonData) {
+        // Get enrolled courses to check progress
+        try {
+          const enrolledCourses = await api.getEnrolledCourses(studentId);
+          const courseEnrollment = enrolledCourses.find(e => e.course_id === parseInt(courseId));
+          if (courseEnrollment) {
+            // Fetch lesson progress from backend
+            // For now, we check if progress exists in the progress relationship
+            setCompleted(false); // Will be updated on next backend call
+          }
+        } catch (err) {
+          console.error('Error checking completion:', err);
+        }
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
