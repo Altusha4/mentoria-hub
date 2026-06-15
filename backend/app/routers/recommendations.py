@@ -111,9 +111,10 @@ def get_student_recommendations(student_id: int, top_k: int = 10, db: Session = 
     if not interests_list:
         return []
 
-    # Получаем рекомендации
-    recommendations = recommendation_engine.get_recommendations(
+    # Получаем рекомендации с учетом bio студента
+    recommendations = recommendation_engine.get_recommendations_with_bio(
         interests_list=interests_list,
+        bio=student.bio,
         top_k=top_k
     )
 

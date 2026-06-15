@@ -138,6 +138,65 @@ class RecommendationEngine:
 
         return recommendations[:top_k]
 
+    def get_recommendations_with_bio(
+        self,
+        interests_list: List[str],
+        bio: Optional[str] = None,
+        top_k: int = 10,
+        exclude_categories: Optional[List[str]] = None
+    ) -> List[Dict]:
+        """
+        Рекомендации с учетом интересов и био студента
+
+        Args:
+            interests_list: список интересов ['STEM', 'Business']
+            bio: текст о студенте (цели, амбиции)
+            top_k: количество рекомендаций
+            exclude_categories: категории для исключения
+
+        Returns:
+            list: список рекомендованных постов с scores
+        """
+        if not self.posts_embeddings or not self.model:
+            return []
+
+        # Получаем базовое рекомендации по интересам
+        base_recommendations = self.get_recommendations(
+            interests_list,
+            top_k=top_k * 2,  # Берем больше для переранжирования
+            exclude_categories=exclude_categories
+        )
+
+        if not base_recommendations or not bio:
+            return base_recommendations[:top_k]
+
+        # Если есть bio, переранжируем по комбинированному скору
+        try:
+            # Создаем эмбеддинг для bio
+            bio_embedding = self.model.encode(bio, convert_to_numpy=True)
+
+            # Переранжируем рекомендации с учетом bio
+            for rec in base_recommendations:
+                post_id = rec['post_id']
+                if post_id in self.posts_embeddings:
+                    post_embedding = np.array(self.posts_embeddings[post_id].get('embedding', []))
+
+                    # Cosine similarity с bio
+                    bio_similarity = np.dot(bio_embedding, post_embedding) / (
+                        np.linalg.norm(bio_embedding) * np.linalg.norm(post_embedding) + 1e-8
+                    )
+
+                    # Комбинируем скор: 60% интересы, 40% bio
+                    rec['score'] = rec['score'] * 0.6 + float(bio_similarity) * 0.4
+
+            # Переранжируем
+            base_recommendations = sorted(base_recommendations, key=lambda x: x['score'], reverse=True)
+
+        except Exception as e:
+            print(f"⚠️  Ошибка при обработке bio: {e}")
+
+        return base_recommendations[:top_k]
+
     def get_available_interests(self) -> List[str]:
         """Получить список доступных интересов"""
         return list(self.student_interests.keys())
