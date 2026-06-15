@@ -26,6 +26,7 @@ class TokenResponse(BaseModel):
     refresh_token: str
     student_id: int
     name: str
+    avatar_emoji: str = "👤"
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
@@ -80,7 +81,8 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
         "access_token": access_token,
         "refresh_token": refresh_token,
         "student_id": db_student.id,
-        "name": f"{db_student.first_name} {db_student.last_name}"
+        "name": f"{db_student.first_name} {db_student.last_name}",
+        "avatar_emoji": avatar_emoji
     }
 
 @router.post("/login", response_model=TokenResponse)
@@ -123,7 +125,8 @@ def login(request: LoginRequest, response: Response, db: Session = Depends(get_d
         "access_token": access_token,
         "refresh_token": refresh_token,
         "student_id": student.id,
-        "name": f"{student.first_name} {student.last_name}"
+        "name": f"{student.first_name} {student.last_name}",
+        "avatar_emoji": student.avatar_emoji
     }
 
 @router.post("/refresh")

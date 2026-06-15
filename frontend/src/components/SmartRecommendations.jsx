@@ -34,7 +34,7 @@ export default function SmartRecommendations({ studentId, studentInterests }) {
         : studentInterests;
 
       // Fetch recommendations
-      const response = await fetch('http://localhost:8080/api/recommendations/get', {
+      const response = await fetch('http://localhost:8000/api/recommendations/get', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

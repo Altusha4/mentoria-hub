@@ -104,8 +104,11 @@ export default function Register({ setStudentId }) {
       sessionStorage.setItem('accessToken', response.access_token);
       sessionStorage.setItem('studentId', response.student_id);
       sessionStorage.setItem('studentName', response.name);
+      sessionStorage.setItem('avatarEmoji', response.avatar_emoji);
+      sessionStorage.setItem('studentInterests', formData.interests.join(', '));
 
       console.log('💾 [REGISTER] Saved to sessionStorage');
+      console.log(`🎨 [REGISTER] Avatar: ${response.avatar_emoji}`);
 
       setStudentId(response.student_id);
 

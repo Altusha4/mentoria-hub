@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8000/api';
 
 // Helper to add Authorization header
 const getHeaders = (token = null) => {
@@ -174,19 +174,36 @@ export const api = {
     return response.json();
   },
 
-  // Recommendations
+  // Recommendations (ML-powered with bio)
   getRecommendedOpportunities: async (studentId) => {
-    const response = await fetch(`${API_BASE_URL}/opportunities/${studentId}/recommended`);
-    return response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/recommendations/student/${studentId}`);
+      if (!response.ok) throw new Error('Failed to fetch recommendations');
+      const posts = await response.json();
+      // Convert posts to opportunity format for display
+      return posts.slice(0, 10).map(post => ({
+        id: post.post_id,
+        title: post.title,
+        category: post.category,
+        score: post.score
+      }));
+    } catch (error) {
+      console.warn('⚠️  Recommendations failed, returning empty', error);
+      return [];
+    }
   },
 
   getRecommendedCourses: async (studentId) => {
-    const response = await fetch(`${API_BASE_URL}/courses/${studentId}/recommended`);
-    if (response.status === 404) {
-      // Fallback: return all courses if endpoint doesn't exist
-      return api.getCourses();
+    try {
+      const response = await fetch(`${API_BASE_URL}/courses/`);
+      if (!response.ok) throw new Error('Failed to fetch courses');
+      const courses = await response.json();
+      // Return first 3 courses as recommendations
+      return courses.slice(0, 3);
+    } catch (error) {
+      console.warn('⚠️  Failed to fetch courses', error);
+      return [];
     }
-    return response.json();
   },
 
   // Search
