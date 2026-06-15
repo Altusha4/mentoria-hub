@@ -114,9 +114,12 @@ async def import_posts():
                     continue
 
                 # Проверяем что поста еще нет в БД
-                existing = db.query(TelegramPost).filter(
-                    TelegramPost.telegram_message_id == message.id
-                ).first()
+                try:
+                    existing = db.query(TelegramPost).filter(
+                        TelegramPost.telegram_message_id == message.id
+                    ).first()
+                except:
+                    existing = None
 
                 if existing:
                     continue

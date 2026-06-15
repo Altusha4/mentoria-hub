@@ -80,7 +80,7 @@ def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
     return {"ok": True}
 
 @router.get("/posts", response_model=List[TelegramPostSchema])
-def get_telegram_posts(limit: int = 10, category: str = None, db: Session = Depends(get_db)):
+def get_telegram_posts(limit: int = 100, category: str = None, db: Session = Depends(get_db)):
     """Получить последние посты из Telegram канала (опционально с фильтром по категориям)"""
     query = db.query(TelegramPost)
 

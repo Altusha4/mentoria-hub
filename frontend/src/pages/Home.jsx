@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
-import TelegramUpdates from '../components/TelegramUpdates';
 
 export default function Home({ studentId }) {
   const [studentName, setStudentName] = useState('');
@@ -112,9 +111,6 @@ export default function Home({ studentId }) {
           </div>
         </div>
       </section>
-
-      {/* Latest Updates from Telegram */}
-      <TelegramUpdates />
 
       {/* CTA Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 dark:from-gray-900 to-indigo-50 dark:to-gray-800 transition-colors duration-300">
