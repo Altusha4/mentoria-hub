@@ -129,6 +129,8 @@ class TelegramPost(Base):
     telegram_message_id = Column(Integer, unique=True, index=True)
     title = Column(String, nullable=True)
     content = Column(Text)
+    summary = Column(Text, nullable=True)  # AI-generated summary
+    post_info = Column(Text, nullable=True)  # JSON with structured data (audience, deadline, format, etc)
     category = Column(String, default="general", index=True)  # hiring, programs, opportunities, news, tips, general
     image_url = Column(String, nullable=True)
     posted_at = Column(DateTime, default=datetime.utcnow)

@@ -6,7 +6,6 @@ from ..database import get_db
 from ..models import TelegramPost
 from ..schemas import TelegramPost as TelegramPostSchema, TelegramPostCreate
 from pydantic import BaseModel
-from ..gemini_service import generate_summary
 
 router = APIRouter(prefix="/api/telegram", tags=["telegram"])
 
@@ -159,13 +158,3 @@ def create_telegram_post(post: TelegramPostCreate, db: Session = Depends(get_db)
 
     return db_post
 
-@router.get("/posts/{post_id}/summary")
-async def get_post_summary(post_id: int, db: Session = Depends(get_db)):
-    """Получить AI-сгенерированный summary для поста"""
-    post = db.query(TelegramPost).filter(TelegramPost.id == post_id).first()
-
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-
-    summary = await generate_summary(post.title, post.content)
-    return {"summary": summary}

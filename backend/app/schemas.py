@@ -96,6 +96,8 @@ class TelegramPostBase(BaseModel):
     title: Optional[str] = None
     content: str
     category: str = "general"
+    summary: Optional[str] = None
+    post_info: Optional[str] = None
     image_url: Optional[str] = None
 
 class TelegramPostCreate(TelegramPostBase):

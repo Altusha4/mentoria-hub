@@ -1,19 +1,25 @@
 import asyncio
 import sys
 import re
+import os
 from datetime import datetime
 from telethon import TelegramClient
 from sqlalchemy.orm import Session
+from openai import OpenAI
 
 # Твои API значения
 API_ID = 33509580
 API_HASH = "1ccfe0bac443811a1755c15f6a1a3b24"
 CHANNEL_USERNAME = "mentoria_updates"  # Твой канал
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Импортируем из backend
 sys.path.insert(0, '/Users/altynayyertay/IdeaProjects/mentoria-hub/backend')
 from app.database import SessionLocal
 from app.models import TelegramPost
+
+# Инициализируем OpenAI клиент
+openai_client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 # Ключевые слова для определения категорий (англ + русс)
 CATEGORY_KEYWORDS = {
@@ -82,6 +88,69 @@ def detect_category(text):
 
     return "general"
 
+def generate_summary(title: str, content: str) -> str:
+    """Generate AI summary for a post"""
+    if not openai_client:
+        return ""
+
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that summarizes Telegram posts in Russian. Keep summaries concise (2-3 sentences) and focus on key details like dates, requirements, and actions."
+                },
+                {
+                    "role": "user",
+                    "content": f"Summarize this post:\n\nTitle: {title}\n\nContent: {content}"
+                }
+            ],
+            max_tokens=150,
+            temperature=0.5
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error generating summary: {e}")
+        return ""
+
+def generate_metadata(title: str, content: str) -> str:
+    """Extract structured metadata from post (JSON format)"""
+    if not openai_client:
+        return ""
+
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert at extracting structured information from Russian text.
+Extract the following information and return ONLY valid JSON (no markdown, no extra text):
+{
+  "audience": "target audience (e.g., 'школьники 9-11 класс')",
+  "deadline": "application deadline date if mentioned",
+  "organizer": "who is organizing/hosting",
+  "format": "format: online/offline/hybrid, location if mentioned",
+  "requirements": "key requirements (concise)",
+  "benefits": "what participants get (experience, certificate, etc)"
+}
+
+If any field is not mentioned, use null. Return ONLY the JSON object."""
+                },
+                {
+                    "role": "user",
+                    "content": f"Title: {title}\n\nContent: {content}"
+                }
+            ],
+            max_tokens=200,
+            temperature=0.3
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error generating metadata: {e}")
+        return ""
+
 async def import_posts():
     print(f"🔐 Подключаюсь к Telegram...")
 
@@ -120,12 +189,18 @@ async def import_posts():
                 if message.photo:
                     image_url = f"https://t.me/{CHANNEL_USERNAME}/{message.id}"
 
+                # Генерируем summary и post_info
+                summary = generate_summary(title, content)
+                post_info = generate_metadata(title, content)
+
                 # Создаем пост
                 post = TelegramPost(
                     telegram_message_id=message.id,
                     title=title,
                     content=content,
                     category=category,
+                    summary=summary,
+                    post_info=post_info,
                     image_url=image_url,
                     posted_at=message.date
                 )

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 import OpportunityCard from '../components/OpportunityCard';
 import CourseCard from '../components/CourseCard';
+import SmartRecommendations from '../components/SmartRecommendations';
 
 export default function Home({ studentId }) {
   const [recommendedOpportunities, setRecommendedOpportunities] = useState([]);
@@ -139,6 +140,9 @@ export default function Home({ studentId }) {
           </div>
         </div>
       </section>
+
+      {/* Smart Recommendations */}
+      <SmartRecommendations studentId={studentId} studentInterests={sessionStorage.getItem('studentInterests')} />
 
       {/* Recommended Opportunities */}
       {!loading && (

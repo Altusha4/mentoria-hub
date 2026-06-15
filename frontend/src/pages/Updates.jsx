@@ -31,8 +31,6 @@ export default function Updates() {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [summary, setSummary] = useState('');
-  const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -42,12 +40,6 @@ export default function Updates() {
     setCurrentIndex(0);
     fetchPostsByCategory(selectedCategory);
   }, [selectedCategory]);
-
-  useEffect(() => {
-    if (posts.length > 0) {
-      fetchSummary(posts[currentIndex].id);
-    }
-  }, [currentIndex, posts]);
 
   const fetchData = async () => {
     try {
@@ -70,20 +62,6 @@ export default function Updates() {
       setPosts(data);
     } catch (error) {
       console.error('Error fetching posts:', error);
-    }
-  };
-
-  const fetchSummary = async (postId) => {
-    setSummaryLoading(true);
-    try {
-      const response = await fetch(`http://localhost:8080/api/telegram/posts/${postId}/summary`);
-      const data = await response.json();
-      setSummary(data.summary || '');
-    } catch (error) {
-      console.error('Error fetching summary:', error);
-      setSummary('');
-    } finally {
-      setSummaryLoading(false);
     }
   };
 
@@ -211,17 +189,84 @@ export default function Updates() {
               </p>
 
               {/* AI Summary */}
-              {summaryLoading ? (
-                <div className="mb-6 p-4 bg-slate-700 rounded-lg text-sm text-slate-300 italic">
-                  🤖 Generating summary...
-                </div>
-              ) : summary ? (
+              {currentPost.summary && (
                 <div className="mb-6 p-4 bg-slate-700 rounded-lg border border-slate-600">
                   <p className="text-slate-200 leading-relaxed">
-                    <span className="font-semibold text-blue-400">✨ Summary:</span> {summary}
+                    <span className="font-semibold text-blue-400">✨ Summary:</span> {currentPost.summary}
                   </p>
                 </div>
-              ) : null}
+              )}
+
+              {/* Structured Metadata */}
+              {currentPost.post_info && (
+                <div className="mb-6 space-y-3">
+                  {(() => {
+                    try {
+                      const data = JSON.parse(currentPost.post_info);
+                      return (
+                        <>
+                          {data.audience && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg">👥</span>
+                              <div>
+                                <p className="text-xs text-slate-400 font-semibold">Кому подойдет</p>
+                                <p className="text-slate-200">{data.audience}</p>
+                              </div>
+                            </div>
+                          )}
+                          {data.deadline && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg">⏰</span>
+                              <div>
+                                <p className="text-xs text-slate-400 font-semibold">Дедлайн подачи</p>
+                                <p className="text-slate-200">{data.deadline}</p>
+                              </div>
+                            </div>
+                          )}
+                          {data.organizer && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg">🏢</span>
+                              <div>
+                                <p className="text-xs text-slate-400 font-semibold">Организатор</p>
+                                <p className="text-slate-200">{data.organizer}</p>
+                              </div>
+                            </div>
+                          )}
+                          {data.format && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg">📍</span>
+                              <div>
+                                <p className="text-xs text-slate-400 font-semibold">Формат</p>
+                                <p className="text-slate-200">{data.format}</p>
+                              </div>
+                            </div>
+                          )}
+                          {data.requirements && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg">💼</span>
+                              <div>
+                                <p className="text-xs text-slate-400 font-semibold">Требования</p>
+                                <p className="text-slate-200">{data.requirements}</p>
+                              </div>
+                            </div>
+                          )}
+                          {data.benefits && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg">🎁</span>
+                              <div>
+                                <p className="text-xs text-slate-400 font-semibold">Преимущества</p>
+                                <p className="text-slate-200">{data.benefits}</p>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    } catch (e) {
+                      return null;
+                    }
+                  })()}
+                </div>
+              )}
 
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-700">
                 <div className="text-xs text-slate-400">
