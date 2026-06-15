@@ -54,22 +54,18 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
     avatar_emoji = generate_avatar_emoji()
     print(f"🎨 [REGISTER] Generated avatar: {avatar_emoji}")
 
-    # Add default values for optional fields
-    db_student = StudentProfile(
-        **student_dict,
-        password_hash=hash_password(password),
-        avatar_emoji=avatar_emoji,
-        gpa=None,
-        ielts_score=None,
-        toefl_score=None,
-        sat_score=None,
-        activities=None,
-        certificates=None,
-        cv_text=None,
-        cv_video_url=None,
-        motivation_letter=None,
-        transcript_url=None
-    )
+    # Add system fields
+    student_dict['password_hash'] = hash_password(password)
+    student_dict['avatar_emoji'] = avatar_emoji
+
+    # Set None for any missing optional fields
+    optional_fields = ['gpa', 'ielts_score', 'toefl_score', 'sat_score', 'activities',
+                      'certificates', 'cv_text', 'cv_video_url', 'motivation_letter', 'transcript_url']
+    for field in optional_fields:
+        if field not in student_dict:
+            student_dict[field] = None
+
+    db_student = StudentProfile(**student_dict)
     print(f"💾 [REGISTER] Adding student to DB: {student.email}")
 
     db.add(db_student)

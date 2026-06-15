@@ -161,12 +161,25 @@ export const api = {
   },
 
   updateStudent: async (id, data) => {
+    console.log('📤 [API] Updating student', id);
+    console.log('📤 [API] Full payload:', JSON.stringify(data, null, 2));
+
     const response = await fetch(`${API_BASE_URL}/students/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    return response.json();
+
+    console.log('📥 [API] Update response status:', response.status);
+    const result = await response.json();
+    console.log('📥 [API] Update response body:', JSON.stringify(result, null, 2));
+
+    if (!response.ok) {
+      console.error('❌ [API] Update failed:', result);
+      throw new Error(result.detail || 'Update failed');
+    }
+
+    return result;
   },
 
   getStudentByEmail: async (email) => {

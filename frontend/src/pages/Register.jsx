@@ -7,15 +7,29 @@ export default function Register({ setStudentId }) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
+    // Step 1: Personal
     email: '',
     first_name: '',
     last_name: '',
-    password: '',
     grade: '10',
+    bio: '',
+    // Step 2: Academic Interest
     interests: [],
     subjects: [],
     goals: '',
-    bio: '',
+    // Step 3: Background
+    gpa: '',
+    ielts_score: '',
+    toefl_score: '',
+    sat_score: '',
+    activities: '',
+    certificates: '',
+    // Step 4: Documents & Security
+    cv_text: '',
+    cv_video_url: '',
+    motivation_letter: '',
+    transcript_url: '',
+    password: '',
   });
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,20 +39,39 @@ export default function Register({ setStudentId }) {
   const interestOptions = ['STEM', 'Business', 'Finance', 'Programming', 'Science', 'Social Impact', 'English'];
   const subjectOptions = ['Mathematics', 'Physics', 'Chemistry', 'English', 'Economics', 'Computer Science'];
 
-  const nextStep = () => {
-    if (currentStep === 1) {
+  const validateStep = (step) => {
+    if (step === 1) {
       if (!formData.email || !formData.first_name || !formData.last_name) {
-        setError('Please fill in all personal information');
-        return;
+        setError('Please fill in all required fields');
+        return false;
       }
-    } else if (currentStep === 2) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        setError('Please enter a valid email');
+        return false;
+      }
+    } else if (step === 2) {
       if (formData.interests.length === 0) {
         setError('Please select at least one interest');
-        return;
+        return false;
+      }
+    } else if (step === 4) {
+      if (!formData.password) {
+        setError('Please enter a password');
+        return false;
+      }
+      if (!captchaVerified) {
+        setError('Please verify the captcha');
+        return false;
       }
     }
     setError('');
-    setCurrentStep(currentStep + 1);
+    return true;
+  };
+
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep(currentStep + 1);
+    }
   };
 
   const prevStep = () => {
@@ -66,40 +99,35 @@ export default function Register({ setStudentId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
 
-    if (!formData.password) {
-      setError('Please enter a password');
-      return;
-    }
+    if (!validateStep(4)) return;
 
-    if (!captchaVerified) {
-      setError('Please verify the captcha');
-      return;
-    }
-
-    console.log('📝 [REGISTER] Form submitted');
-    console.log(`📝 [REGISTER] Email: ${formData.email}`);
-    console.log(`📝 [REGISTER] Name: ${formData.first_name} ${formData.last_name}`);
-    console.log(`📝 [REGISTER] Grade: ${formData.grade}`);
-    console.log(`📝 [REGISTER] Interests: ${formData.interests.join(',')}`);
-
-    console.log('✅ [REGISTER] Validation passed, sending to API...');
     setLoading(true);
 
     try {
       const payload = {
-        ...formData,
+        email: formData.email,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        password: formData.password,
+        grade: parseInt(formData.grade),
+        bio: formData.bio || '',
         interests: formData.interests.join(','),
         subjects: formData.subjects.join(','),
+        goals: formData.goals || '',
+        gpa: formData.gpa ? parseFloat(formData.gpa) : null,
+        ielts_score: formData.ielts_score ? parseFloat(formData.ielts_score) : null,
+        toefl_score: formData.toefl_score ? parseInt(formData.toefl_score) : null,
+        sat_score: formData.sat_score ? parseInt(formData.sat_score) : null,
+        activities: formData.activities || '',
+        certificates: formData.certificates || '',
+        cv_text: formData.cv_text || '',
+        cv_video_url: formData.cv_video_url || '',
+        motivation_letter: formData.motivation_letter || '',
+        transcript_url: formData.transcript_url || '',
       };
 
-      console.log('📤 [REGISTER] Sending payload:', payload);
-
       const response = await api.register(payload);
-
-      console.log('✅ [REGISTER] Registration successful!');
-      console.log('📥 [REGISTER] Response:', response);
 
       sessionStorage.setItem('accessToken', response.access_token);
       sessionStorage.setItem('studentId', response.student_id);
@@ -107,266 +135,412 @@ export default function Register({ setStudentId }) {
       sessionStorage.setItem('avatarEmoji', response.avatar_emoji);
       sessionStorage.setItem('studentInterests', formData.interests.join(', '));
 
-      console.log('💾 [REGISTER] Saved to sessionStorage');
-      console.log(`🎨 [REGISTER] Avatar: ${response.avatar_emoji}`);
-
       setStudentId(response.student_id);
-
-      console.log('✅ [REGISTER] Redirecting to home...');
       navigate('/');
     } catch (err) {
-      console.error('❌ [REGISTER] Error caught:', err);
+      console.error('Error:', err);
       setError('Failed to create account. Email might already be registered.');
     } finally {
       setLoading(false);
     }
   };
 
+  const steps = [
+    { number: 1, label: 'Personal', icon: '👤' },
+    { number: 2, label: 'Interests', icon: '⭐' },
+    { number: 3, label: 'Background', icon: '🎓' },
+    { number: 4, label: 'Secure', icon: '🔐' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 py-12 px-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-2xl p-8">
-        <div className="text-center mb-8">
-          <img src="/logo.png" alt="Mentoria Logo" className="w-12 h-12 mx-auto mb-4 object-contain" />
-          <h1 className="text-3xl font-bold text-gray-900">Create Your Account</h1>
-          <p className="text-gray-600 mt-2">Join thousands of students learning with Mentoria</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 py-12 px-4 flex items-center justify-center">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="text-center mb-8 text-white">
+          <img src="/logo.png" alt="Mentoria" className="w-16 h-16 mx-auto mb-4 object-contain" />
+          <h1 className="text-4xl font-bold mb-2">Join Mentoria Hub</h1>
+          <p className="text-blue-100">Create your account in just 4 steps</p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mb-8 flex items-center justify-center gap-2">
-          {[1, 2, 3].map((step) => (
-            <div key={step} className="flex items-center gap-2">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                  currentStep >= step
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-300 text-gray-600'
-                }`}
-              >
-                {step}
-              </div>
-              {step < 3 && (
+        {/* Progress Indicator */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            {steps.map((step) => (
+              <div key={step.number} className="flex flex-col items-center flex-1">
                 <div
-                  className={`w-12 h-1 transition-all ${
-                    currentStep > step ? 'bg-blue-600' : 'bg-gray-300'
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all mb-2 ${
+                    currentStep >= step.number
+                      ? 'bg-white text-blue-600 shadow-lg'
+                      : 'bg-white bg-opacity-30 text-white'
                   }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="text-center mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {currentStep === 1 && 'Personal Information'}
-            {currentStep === 2 && 'Your Interests & Goals'}
-            {currentStep === 3 && 'Secure Your Account'}
-          </h2>
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700 text-sm font-medium">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Step 1: Personal Info */}
-          {currentStep === 1 && (
-            <div className="space-y-4 animate-fadeIn">
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Email Address *</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">First Name *</label>
-                  <input
-                    type="text"
-                    value={formData.first_name}
-                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="John"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Last Name *</label>
-                  <input
-                    type="text"
-                    value={formData.last_name}
-                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    placeholder="Doe"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Grade Level *</label>
-                <select
-                  value={formData.grade}
-                  onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  {grades.map(grade => (
-                    <option key={grade} value={grade}>Grade {grade}</option>
-                  ))}
-                </select>
+                  {step.icon}
+                </div>
+                <span className={`text-sm font-semibold ${currentStep >= step.number ? 'text-white' : 'text-blue-200'}`}>
+                  {step.label}
+                </span>
               </div>
+            ))}
+          </div>
+          {/* Progress Bar */}
+          <div className="h-1 bg-white bg-opacity-20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white transition-all duration-300"
+              style={{ width: `${(currentStep / 4) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-6">
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+              <p className="text-red-700 font-semibold text-sm">{error}</p>
             </div>
           )}
 
-          {/* Step 2: Interests */}
-          {currentStep === 2 && (
-            <div className="space-y-4 animate-fadeIn">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">What interests you? *</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {interestOptions.map(interest => (
-                    <button
-                      key={interest}
-                      type="button"
-                      onClick={() => handleInterestToggle(interest)}
-                      className={`p-3 border-2 rounded-lg font-semibold transition-all text-sm ${
-                        formData.interests.includes(interest)
-                          ? 'border-blue-600 bg-blue-50 text-blue-600'
-                          : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400'
-                      }`}
-                    >
-                      {interest}
-                    </button>
-                  ))}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Step 1: Personal Info */}
+            {currentStep === 1 && (
+              <div className="space-y-6 animate-fadeIn">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Personal Information</h2>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
+                    <input
+                      type="text"
+                      value={formData.first_name}
+                      onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                      placeholder="John"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
+                    <input
+                      type="text"
+                      value={formData.last_name}
+                      onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                      placeholder="Doe"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                    placeholder="you@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Grade Level *</label>
+                  <select
+                    value={formData.grade}
+                    onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                  >
+                    {grades.map(grade => (
+                      <option key={grade} value={grade}>Grade {grade}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">About You (Bio)</label>
+                  <textarea
+                    value={formData.bio}
+                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    rows="3"
+                    placeholder="Tell us about yourself, your background, achievements..."
+                  />
                 </div>
               </div>
+            )}
 
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Your Subjects</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {subjectOptions.map(subject => (
-                    <button
-                      key={subject}
-                      type="button"
-                      onClick={() => handleSubjectToggle(subject)}
-                      className={`p-3 border-2 rounded-lg font-semibold transition-all text-sm ${
-                        formData.subjects.includes(subject)
-                          ? 'border-green-600 bg-green-50 text-green-600'
-                          : 'border-gray-300 bg-white text-gray-900 hover:border-gray-400'
-                      }`}
-                    >
-                      {subject}
-                    </button>
-                  ))}
+            {/* Step 2: Interests & Goals */}
+            {currentStep === 2 && (
+              <div className="space-y-6 animate-fadeIn">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Interests & Goals</h2>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-4">What interests you? *</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {interestOptions.map(interest => (
+                      <button
+                        key={interest}
+                        type="button"
+                        onClick={() => handleInterestToggle(interest)}
+                        className={`p-3 border-2 rounded-lg font-semibold transition-all ${
+                          formData.interests.includes(interest)
+                            ? 'border-blue-600 bg-blue-50 text-blue-600'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        {interest}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-4">Your Subjects</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {subjectOptions.map(subject => (
+                      <button
+                        key={subject}
+                        type="button"
+                        onClick={() => handleSubjectToggle(subject)}
+                        className={`p-3 border-2 rounded-lg font-semibold transition-all ${
+                          formData.subjects.includes(subject)
+                            ? 'border-green-600 bg-green-50 text-green-600'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        {subject}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Your Goals & Ambitions</label>
+                  <textarea
+                    value={formData.goals}
+                    onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    rows="3"
+                    placeholder="E.g., Get into top university, learn programming, win competitions..."
+                  />
                 </div>
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Your Goals & Ambitions</label>
-                <textarea
-                  value={formData.goals}
-                  onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  rows="2"
-                  placeholder="E.g., Get into a top university, learn programming, win a competition..."
-                />
+            {/* Step 3: Background & Academic Stats */}
+            {currentStep === 3 && (
+              <div className="space-y-6 animate-fadeIn">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Background</h2>
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-gray-600">📊 <span className="font-semibold">Optional:</span> Share your academic achievements to get better opportunities</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">GPA</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={formData.gpa}
+                        onChange={(e) => setFormData({ ...formData, gpa: e.target.value })}
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        placeholder="3.8"
+                      />
+                      <span className="px-3 py-3 text-gray-600 font-semibold">/4.0</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">IELTS Score</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={formData.ielts_score}
+                        onChange={(e) => setFormData({ ...formData, ielts_score: e.target.value })}
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        placeholder="7.5"
+                      />
+                      <span className="px-3 py-3 text-gray-600 font-semibold">/9.0</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">TOEFL Score</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        value={formData.toefl_score}
+                        onChange={(e) => setFormData({ ...formData, toefl_score: e.target.value })}
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        placeholder="105"
+                      />
+                      <span className="px-3 py-3 text-gray-600 font-semibold">/120</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">SAT Score</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        value={formData.sat_score}
+                        onChange={(e) => setFormData({ ...formData, sat_score: e.target.value })}
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        placeholder="1450"
+                      />
+                      <span className="px-3 py-3 text-gray-600 font-semibold">/1600</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Sports & Activities</label>
+                  <textarea
+                    value={formData.activities}
+                    onChange={(e) => setFormData({ ...formData, activities: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    rows="2"
+                    placeholder="E.g., Football (3 years), Volleyball club, Student council..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Certificates & Awards</label>
+                  <textarea
+                    value={formData.certificates}
+                    onChange={(e) => setFormData({ ...formData, certificates: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    rows="2"
+                    placeholder="E.g., Math Olympiad (1st), Cambridge English, Science Fair..."
+                  />
+                </div>
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Tell Us About Yourself</label>
-                <textarea
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  rows="3"
-                  placeholder="Share your background, achievements, skills, or why you're interested in learning. This helps us recommend better opportunities and courses."
-                />
+            {/* Step 4: Documents & Security */}
+            {currentStep === 4 && (
+              <div className="space-y-6 animate-fadeIn">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Documents & Security</h2>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Motivation Letter</label>
+                    <textarea
+                      value={formData.motivation_letter}
+                      onChange={(e) => setFormData({ ...formData, motivation_letter: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                      rows="3"
+                      placeholder="Share your goals and why you want to join Mentoria..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">CV (Text)</label>
+                    <textarea
+                      value={formData.cv_text}
+                      onChange={(e) => setFormData({ ...formData, cv_text: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none font-mono text-sm"
+                      rows="3"
+                      placeholder="Your CV in text format..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">CV Video URL</label>
+                    <input
+                      type="url"
+                      value={formData.cv_video_url}
+                      onChange={(e) => setFormData({ ...formData, cv_video_url: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                      placeholder="https://youtube.com/... or https://vimeo.com/..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Transcript/Certificate URL</label>
+                    <input
+                      type="url"
+                      value={formData.transcript_url}
+                      onChange={(e) => setFormData({ ...formData, transcript_url: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t-2 border-gray-200 pt-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
+                    <input
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                      placeholder="••••••••"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Minimum 6 characters recommended</p>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg mt-4">
+                    <MathCaptcha onVerify={setCaptchaVerified} />
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 3: Security */}
-          {currentStep === 3 && (
-            <div className="space-y-4 animate-fadeIn">
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Password *</label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="••••••••"
-                />
-                <p className="text-xs text-gray-500 mt-1">Minimum 6 characters recommended</p>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <MathCaptcha onVerify={setCaptchaVerified} />
-              </div>
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="flex gap-4 pt-6 justify-center items-center">
-            <button
-              type="button"
-              onClick={prevStep}
-              className={`px-6 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 ${
-                currentStep === 1 ? 'invisible' : ''
-              }`}
-            >
-              ← Back
-            </button>
-
-            {currentStep < 3 ? (
+            {/* Navigation Buttons */}
+            <div className="flex gap-4 pt-8 justify-between">
               <button
                 type="button"
-                onClick={nextStep}
-                className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 min-w-32"
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className={`px-8 py-3 font-semibold rounded-lg border-2 transition-all ${
+                  currentStep === 1
+                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               >
-                Next →
+                ← Back
               </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={loading || !captchaVerified}
-                className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-40"
-              >
-                {loading ? 'Creating account...' : 'Create Account'}
-              </button>
-            )}
-          </div>
-        </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-gray-600 text-center text-sm">
+              {currentStep < 4 ? (
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all"
+                >
+                  Next →
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={loading || !captchaVerified}
+                  className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {loading ? 'Creating account...' : '✅ Create Account'}
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+
+        {/* Sign In Link */}
+        <div className="text-center text-white">
+          <p className="text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link to="/login" className="font-bold underline hover:text-blue-100">
               Sign in here
             </Link>
           </p>
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-in-out;
-        }
-      `}</style>
     </div>
   );
 }

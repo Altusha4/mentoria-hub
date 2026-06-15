@@ -80,6 +80,27 @@ class StudentProfileBase(BaseModel):
 class StudentProfileCreate(StudentProfileBase):
     password: str  # Пароль в открытом виде (будет захеширован на бэке)
 
+class StudentProfileUpdate(BaseModel):
+    """Schema for updating student profile (without password) - all fields optional"""
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    grade: Optional[int] = None
+    interests: Optional[str] = None
+    subjects: Optional[str] = None
+    goals: Optional[str] = None
+    bio: Optional[str] = None
+    gpa: Optional[float] = None
+    ielts_score: Optional[float] = None
+    toefl_score: Optional[int] = None
+    sat_score: Optional[int] = None
+    activities: Optional[str] = None
+    certificates: Optional[str] = None
+    cv_text: Optional[str] = None
+    cv_video_url: Optional[str] = None
+    motivation_letter: Optional[str] = None
+    transcript_url: Optional[str] = None
+
 class StudentProfile(StudentProfileBase):
     id: int
     avatar_emoji: str

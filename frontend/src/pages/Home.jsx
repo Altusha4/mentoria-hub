@@ -1,13 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
-import OpportunityCard from '../components/OpportunityCard';
-import CourseCard from '../components/CourseCard';
-import SmartRecommendations from '../components/SmartRecommendations';
 
 export default function Home({ studentId }) {
-  const [recommendedOpportunities, setRecommendedOpportunities] = useState([]);
-  const [recommendedCourses, setRecommendedCourses] = useState([]);
   const [studentName, setStudentName] = useState('');
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(new Set());
@@ -21,40 +16,17 @@ export default function Home({ studentId }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [opportunities, courses, enrolled] = await Promise.all([
-        api.getRecommendedOpportunities(studentId),
-        api.getRecommendedCourses(studentId),
+      const [enrolled, savedOpp] = await Promise.all([
         api.getEnrolledCourses(studentId),
+        api.getSavedOpportunities(studentId),
       ]);
-      setRecommendedOpportunities(opportunities.slice(0, 3));
-      setRecommendedCourses(courses.slice(0, 3));
       setEnrolledCount(enrolled.length);
-
-      const savedOpp = await api.getSavedOpportunities(studentId);
       const savedIds = new Set(savedOpp.map(item => item.opportunity.id));
       setSaved(savedIds);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSave = async (opportunityId) => {
-    try {
-      if (saved.has(opportunityId)) {
-        await api.unsaveOpportunity(opportunityId, studentId);
-        setSaved(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(opportunityId);
-          return newSet;
-        });
-      } else {
-        await api.saveOpportunity(opportunityId, studentId);
-        setSaved(prev => new Set([...prev, opportunityId]));
-      }
-    } catch (error) {
-      console.error('Error saving opportunity:', error);
     }
   };
 
@@ -120,7 +92,6 @@ export default function Home({ studentId }) {
         </div>
       </section>
 
-
       {/* Quick Stats Section */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
@@ -141,148 +112,32 @@ export default function Home({ studentId }) {
         </div>
       </section>
 
-      {/* Smart Recommendations */}
-      <SmartRecommendations studentId={studentId} studentInterests={sessionStorage.getItem('studentInterests')} />
-
-      {/* Recommended Opportunities */}
-      {!loading && (
-        <>
-          <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-between mb-10">
-                <div>
-                  <h2 className="text-4xl font-bold text-gray-900 dark:text-white">For You</h2>
-                  <p className="text-gray-600 dark:text-gray-400 mt-2">Opportunities matching your interests</p>
-                </div>
-                <Link to="/opportunities" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold text-lg">
-                  See all →
-                </Link>
-              </div>
-              {recommendedOpportunities.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {recommendedOpportunities.map(opp => (
-                    <OpportunityCard
-                      key={opp.id}
-                      opportunity={opp}
-                      onSave={() => handleSave(opp.id)}
-                      saved={saved.has(opp.id)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-gradient-to-br from-blue-50 dark:from-gray-800 to-indigo-50 dark:to-gray-900 rounded-xl p-12 text-center border-2 border-dashed border-blue-200 dark:border-gray-700">
-                  <div className="text-5xl mb-4">🔍</div>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg">No opportunities match your interests yet.</p>
-                  <Link to="/opportunities" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold mt-4 inline-block">
-                    Explore all opportunities →
-                  </Link>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Recommended Courses */}
-          <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-between mb-10">
-                <div>
-                  <h2 className="text-4xl font-bold text-gray-900 dark:text-white">Recommended Courses</h2>
-                  <p className="text-gray-600 dark:text-gray-400 mt-2">Continue learning at your own pace</p>
-                </div>
-                <Link to="/courses" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold text-lg">
-                  See all →
-                </Link>
-              </div>
-              {recommendedCourses.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {recommendedCourses.map(course => (
-                    <CourseCard
-                      key={course.id}
-                      course={course}
-                      enrolled={false}
-                      progress={0}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-700">
-                  <div className="text-5xl mb-4">📚</div>
-                  <p className="text-gray-600 dark:text-gray-400 text-lg">No courses available yet.</p>
-                </div>
-              )}
-            </div>
-          </section>
-        </>
-      )}
-
-      {loading && (
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950">
-          <div className="max-w-7xl mx-auto text-center">
-            <div className="inline-block">
-              <div className="text-5xl mb-4 animate-bounce">⏳</div>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">Loading your personalized content...</p>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 dark:text-white mb-16">Why Choose Mentoria Hub?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: '🎯',
-                title: 'Find Your Path',
-                description: 'Discover olympiads, internships, scholarships, and competitions suited to your interests and grade level.',
-              },
-              {
-                icon: '⏰',
-                title: 'Learn at Your Pace',
-                description: 'Take courses asynchronously with video lessons, materials, and mini-tests. No fixed schedules or time pressure.',
-              },
-              {
-                icon: '📊',
-                title: 'Track Your Growth',
-                description: 'Monitor your progress with detailed analytics, achievements, and personalized recommendations.',
-              },
-            ].map((feature, idx) => (
-              <div key={idx} className="group bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-100 dark:border-gray-700 hover:shadow-2xl dark:hover:shadow-blue-900/30 transition-all hover:border-blue-200 dark:hover:border-blue-700 hover:-translate-y-2">
-                <div className="text-5xl mb-4 group-hover:scale-125 transition-transform">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-950">
-        <div className="max-w-5xl mx-auto">
-          <div className="relative bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-900 dark:to-indigo-900 rounded-3xl p-12 md:p-16 text-center text-white overflow-hidden transition-colors duration-300">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-10 -z-1"></div>
-            <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Transform Your Future?</h2>
-              <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-                Join thousands of students who are already discovering opportunities and mastering new skills with Mentoria Hub.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  to="/opportunities"
-                  className="inline-flex items-center justify-center px-10 py-4 bg-white text-blue-600 dark:text-blue-700 font-bold rounded-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-xl"
-                >
-                  Explore Opportunities
-                </Link>
-                <Link
-                  to="/courses"
-                  className="inline-flex items-center justify-center px-10 py-4 bg-blue-500 text-white font-bold rounded-lg hover:bg-blue-700 transition-all border-2 border-white border-opacity-30"
-                >
-                  Start Learning
-                </Link>
-              </div>
-            </div>
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 dark:from-gray-900 to-indigo-50 dark:to-gray-800 transition-colors duration-300">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Ready to explore more?</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-8">
+            Check out our full catalog of opportunities and courses to find what interests you most.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/opportunities"
+              className="inline-flex items-center justify-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-all shadow-lg"
+            >
+              All Opportunities →
+            </Link>
+            <Link
+              to="/courses"
+              className="inline-flex items-center justify-center px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg transition-all shadow-lg"
+            >
+              All Courses →
+            </Link>
+            <Link
+              to="/updates"
+              className="inline-flex items-center justify-center px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg transition-all shadow-lg"
+            >
+              Latest Updates →
+            </Link>
           </div>
         </div>
       </section>

@@ -52,9 +52,6 @@ export default function Header({ studentId, setStudentId }) {
             <Link to="/updates" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center gap-1">
               Updates
             </Link>
-            <Link to="/leaderboard" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
-              Leaderboard
-            </Link>
             <Link to="/profile" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
               Profile
             </Link>
@@ -142,13 +139,6 @@ export default function Header({ studentId, setStudentId }) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 📢 Updates
-              </Link>
-              <Link
-                to="/leaderboard"
-                className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Leaderboard
               </Link>
               <Link
                 to="/profile"

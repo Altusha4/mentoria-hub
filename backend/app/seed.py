@@ -1,6 +1,6 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from .database import SessionLocal
-from .models import StudentProfile, Opportunity, Course, Lesson, Quiz
+from .models import StudentProfile, Opportunity, Course, Lesson, Quiz, TelegramPost
 
 def seed_data():
     db = SessionLocal()
@@ -211,6 +211,69 @@ def seed_data():
                     order=order,
                 )
                 db.add(lesson)
+    db.commit()
+
+    # Create sample Telegram posts
+    telegram_posts = [
+        TelegramPost(
+            telegram_message_id=1,
+            title="🎯 International Science Olympiad 2024",
+            content="Join the biggest science competition! Participate in Physics, Chemistry, Biology, and more. Early bird registration is open now!",
+            category="opportunities",
+            posted_at=datetime.now(),
+        ),
+        TelegramPost(
+            telegram_message_id=2,
+            title="💼 Summer Internship Program - Google",
+            content="Google is hiring summer interns! Applications are open for software engineering, product management, and business roles. Apply before June 30th!",
+            category="hiring",
+            posted_at=datetime.now(),
+        ),
+        TelegramPost(
+            telegram_message_id=3,
+            title="📚 Free Python Course - Week 1 Complete",
+            content="Congratulations to all who completed week 1! This week we'll dive into advanced OOP concepts. Check out our GitHub repo for resources.",
+            category="programs",
+            posted_at=datetime.now(),
+        ),
+        TelegramPost(
+            telegram_message_id=4,
+            title="💡 5 Tips for Successful University Applications",
+            content="1. Start early\n2. Tell your story\n3. Show initiative\n4. Get good recommendations\n5. Perfect your essays\n\nRead the full guide in our blog!",
+            category="tips",
+            posted_at=datetime.now(),
+        ),
+        TelegramPost(
+            telegram_message_id=5,
+            title="🏆 Student Success Story - Aida's Journey",
+            content="Meet Aida! She went from a small town to Harvard through hard work and mentorship. Read her inspiring story and learn what worked for her.",
+            category="news",
+            posted_at=datetime.now(),
+        ),
+        TelegramPost(
+            telegram_message_id=6,
+            title="🤖 AI & Machine Learning Hackathon 2024",
+            content="48-hour hackathon starting June 25th! Build innovative AI solutions with $50k in prizes. Teams of 2-4. Register now!",
+            category="opportunities",
+            posted_at=datetime.now(),
+        ),
+        TelegramPost(
+            telegram_message_id=7,
+            title="📖 New Scholarship: Full Ride to Stanford",
+            content="New scholarship program available for high-achieving students from Central Asia. GPA 3.8+ required. Application deadline: July 15th.",
+            category="programs",
+            posted_at=datetime.now(),
+        ),
+        TelegramPost(
+            telegram_message_id=8,
+            title="✨ Mentorship Program Launched",
+            content="Connect with industry experts and top students! Get personalized guidance for your university applications and career path.",
+            category="news",
+            posted_at=datetime.now(),
+        ),
+    ]
+    for post in telegram_posts:
+        db.add(post)
     db.commit()
 
     print("✅ Mock data seeded successfully!")
