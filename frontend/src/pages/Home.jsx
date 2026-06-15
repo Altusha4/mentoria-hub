@@ -9,18 +9,48 @@ export default function Home({ studentId }) {
   const [recommendedCourses, setRecommendedCourses] = useState([]);
   const [studentName, setStudentName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [saved, setSaved] = useState(new Set());
 
   useEffect(() => {
     fetchRecommendations();
+    fetchSavedOpportunities();
     setStudentName(sessionStorage.getItem('studentName') || 'Student');
   }, [studentId]);
+
+  const fetchSavedOpportunities = async () => {
+    try {
+      const data = await api.getSavedOpportunities(studentId);
+      const savedIds = new Set(data.map(item => item.opportunity.id));
+      setSaved(savedIds);
+    } catch (error) {
+      console.error('Error fetching saved opportunities:', error);
+    }
+  };
+
+  const handleSave = async (opportunityId) => {
+    try {
+      if (saved.has(opportunityId)) {
+        await api.unsaveOpportunity(opportunityId, studentId);
+        setSaved(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(opportunityId);
+          return newSet;
+        });
+      } else {
+        await api.saveOpportunity(opportunityId, studentId);
+        setSaved(prev => new Set([...prev, opportunityId]));
+      }
+    } catch (error) {
+      console.error('Error saving opportunity:', error);
+    }
+  };
 
   const fetchRecommendations = async () => {
     setLoading(true);
     try {
       const [opportunities, courses] = await Promise.all([
         api.getRecommendedOpportunities(studentId),
-        api.getCourses(),
+        api.getRecommendedCourses(studentId),
       ]);
       setRecommendedOpportunities(opportunities.slice(0, 3));
       setRecommendedCourses(courses.slice(0, 3));
@@ -82,8 +112,8 @@ export default function Home({ studentId }) {
                     <OpportunityCard
                       key={opp.id}
                       opportunity={opp}
-                      onSave={() => {}}
-                      saved={false}
+                      onSave={() => handleSave(opp.id)}
+                      saved={saved.has(opp.id)}
                     />
                   ))}
                 </div>
