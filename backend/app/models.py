@@ -24,7 +24,25 @@ class StudentProfile(Base):
     goals = Column(String)
     bio = Column(Text, nullable=True)  # О себе: амбиции, цели, интересы
     avatar_emoji = Column(String, default="👤")  # Аватар как эмодзи
+
+    # Academic Stats
+    gpa = Column(Float, nullable=True)  # GPA (0-4.0 или 0-5.0)
+    ielts_score = Column(Float, nullable=True)  # IELTS (0-9)
+    toefl_score = Column(Integer, nullable=True)  # TOEFL (0-120)
+    sat_score = Column(Integer, nullable=True)  # SAT (0-1600)
+
+    # Activities & Achievements
+    activities = Column(Text, nullable=True)  # Спорт, клубы, волонтёрство (JSON)
+    certificates = Column(Text, nullable=True)  # Сертификаты, награды (JSON)
+
+    # Documents
+    cv_text = Column(Text, nullable=True)  # CV в текстовом формате
+    cv_video_url = Column(String, nullable=True)  # Видео CV
+    motivation_letter = Column(Text, nullable=True)  # Мотивационное письмо
+    transcript_url = Column(String, nullable=True)  # Ссылка на транскрипт/аттестат
+
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     enrollments = relationship("Enrollment", back_populates="student")
     lesson_progress = relationship("LessonProgress", back_populates="student")

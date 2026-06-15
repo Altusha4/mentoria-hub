@@ -63,13 +63,28 @@ class StudentProfileBase(BaseModel):
     subjects: Optional[str] = None
     goals: Optional[str] = None
     bio: Optional[str] = None
+    # Academic Stats
+    gpa: Optional[float] = None
+    ielts_score: Optional[float] = None
+    toefl_score: Optional[int] = None
+    sat_score: Optional[int] = None
+    # Activities & Achievements
+    activities: Optional[str] = None
+    certificates: Optional[str] = None
+    # Documents
+    cv_text: Optional[str] = None
+    cv_video_url: Optional[str] = None
+    motivation_letter: Optional[str] = None
+    transcript_url: Optional[str] = None
 
 class StudentProfileCreate(StudentProfileBase):
     password: str  # Пароль в открытом виде (будет захеширован на бэке)
 
 class StudentProfile(StudentProfileBase):
     id: int
+    avatar_emoji: str
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
