@@ -28,9 +28,9 @@ export default function App() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('studentId');
-    localStorage.removeItem('studentName');
-    localStorage.removeItem('studentInterests');
+    sessionStorage.removeItem('studentId');
+    sessionStorage.removeItem('studentName');
+    sessionStorage.removeItem('accessToken');
     setStudentId(null);
   };
 
