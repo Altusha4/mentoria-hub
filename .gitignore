@@ -12,3 +12,4 @@ dist/
 *.egg-info/
 node_modules/
 .next/
+backend/models/ml_recommender_model/model.safetensors
