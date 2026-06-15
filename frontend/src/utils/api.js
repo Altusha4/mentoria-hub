@@ -177,7 +177,9 @@ export const api = {
   // Recommendations (ML-powered with bio)
   getRecommendedOpportunities: async (studentId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/recommendations/student/${studentId}`);
+      const response = await fetch(`${API_BASE_URL}/recommendations/student/${studentId}?top_k=10`, {
+        method: 'POST'
+      });
       if (!response.ok) throw new Error('Failed to fetch recommendations');
       const posts = await response.json();
       // Convert posts to opportunity format for display
