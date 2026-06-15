@@ -188,4 +188,49 @@ export const api = {
     }
     return response.json();
   },
+
+  // Search
+  searchOpportunities: async (query) => {
+    const response = await fetch(`${API_BASE_URL}/opportunities/?category=${query}`);
+    return response.json();
+  },
+
+  searchCourses: async (query) => {
+    const response = await fetch(`${API_BASE_URL}/courses/`);
+    const allCourses = await response.json();
+    return allCourses.filter(course =>
+      course.title.toLowerCase().includes(query.toLowerCase()) ||
+      course.description.toLowerCase().includes(query.toLowerCase())
+    );
+  },
+
+  // Leaderboard
+  getLeaderboard: async () => {
+    const response = await fetch(`${API_BASE_URL}/students/leaderboard/top?limit=100`);
+    return response.json();
+  },
+
+  // Telegram Posts
+  getTelegramPosts: async (limit = 5, category = null) => {
+    const params = new URLSearchParams({ limit });
+    if (category && category !== "all") {
+      params.append("category", category);
+    }
+    const response = await fetch(`${API_BASE_URL}/telegram/posts?${params}`);
+    return response.json();
+  },
+
+  getTelegramCategories: async () => {
+    const response = await fetch(`${API_BASE_URL}/telegram/categories`);
+    return response.json();
+  },
+
+  updateTelegramPostCategory: async (postId, category) => {
+    const response = await fetch(`${API_BASE_URL}/telegram/posts/${postId}/category`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category }),
+    });
+    return response.json();
+  },
 };

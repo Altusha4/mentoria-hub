@@ -10,6 +10,9 @@ import Lesson from './pages/Lesson';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Search from './pages/Search';
+import Leaderboard from './pages/Leaderboard';
+import Updates from './pages/Updates';
 import './index.css';
 
 export default function App() {
@@ -24,6 +27,10 @@ export default function App() {
     if (savedStudentId && accessToken) {
       setStudentId(parseInt(savedStudentId));
     }
+
+    // Clear old localStorage theme key
+    localStorage.removeItem('theme');
+
     setLoading(false);
   }, []);
 
@@ -40,7 +47,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen bg-white text-gray-900">
         {studentId && <Header studentId={studentId} setStudentId={() => handleLogout()} />}
 
         <main className="flex-1">
@@ -73,6 +80,18 @@ export default function App() {
             <Route
               path="/profile"
               element={studentId ? <Profile studentId={studentId} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/search"
+              element={studentId ? <Search studentId={studentId} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/leaderboard"
+              element={studentId ? <Leaderboard studentId={studentId} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/updates"
+              element={studentId ? <Updates /> : <Navigate to="/login" />}
             />
 
             {/* Redirect unknown routes */}

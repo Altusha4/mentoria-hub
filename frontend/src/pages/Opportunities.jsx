@@ -75,11 +75,12 @@ export default function Opportunities({ studentId }) {
   const grades = ['8-9', '9-11', '10-11', '8-11'];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-4xl font-bold text-gray-900 mb-12">Education Opportunities</h1>
+    <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-12">Education Opportunities</h1>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { key: 'category', label: 'Category', options: categories },
           { key: 'direction', label: 'Direction', options: directions },
@@ -90,7 +91,7 @@ export default function Opportunities({ studentId }) {
             key={key}
             value={filters[key]}
             onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">{label}</option>
             {options.map(option => (
@@ -103,11 +104,11 @@ export default function Opportunities({ studentId }) {
       {/* Opportunities Grid */}
       {loading ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">Loading opportunities...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading opportunities...</p>
         </div>
       ) : opportunities.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500">No opportunities found. Try adjusting your filters.</p>
+          <p className="text-gray-500 dark:text-gray-400">No opportunities found. Try adjusting your filters.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -121,6 +122,7 @@ export default function Opportunities({ studentId }) {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

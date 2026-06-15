@@ -121,3 +121,15 @@ class LessonProgress(Base):
 
     student = relationship("StudentProfile", back_populates="lesson_progress")
     lesson = relationship("Lesson", back_populates="progress")
+
+class TelegramPost(Base):
+    __tablename__ = "telegram_posts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    telegram_message_id = Column(Integer, unique=True, index=True)
+    title = Column(String, nullable=True)
+    content = Column(Text)
+    category = Column(String, default="general", index=True)  # hiring, programs, opportunities, news, tips, general
+    image_url = Column(String, nullable=True)
+    posted_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)

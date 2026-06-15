@@ -90,3 +90,21 @@ class EnrollmentResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class TelegramPostBase(BaseModel):
+    telegram_message_id: int
+    title: Optional[str] = None
+    content: str
+    category: str = "general"
+    image_url: Optional[str] = None
+
+class TelegramPostCreate(TelegramPostBase):
+    posted_at: Optional[datetime] = None
+
+class TelegramPost(TelegramPostBase):
+    id: int
+    posted_at: datetime
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
