@@ -17,6 +17,7 @@ class StudentProfile(Base):
     email = Column(String, unique=True, index=True)
     first_name = Column(String)
     last_name = Column(String)
+    password_hash = Column(String)  # Хеширован bcrypt
     grade = Column(Integer)  # 8-11
     interests = Column(String)  # JSON или CSV, например "STEM,Business"
     subjects = Column(String)

@@ -64,7 +64,7 @@ class StudentProfileBase(BaseModel):
     goals: Optional[str] = None
 
 class StudentProfileCreate(StudentProfileBase):
-    pass
+    password: str  # Пароль в открытом виде (будет захеширован на бэке)
 
 class StudentProfile(StudentProfileBase):
     id: int
