@@ -34,6 +34,7 @@ class StudentProfile(Base):
     # Activities & Achievements
     activities = Column(Text, nullable=True)  # Спорт, клубы, волонтёрство (JSON)
     certificates = Column(Text, nullable=True)  # Сертификаты, награды (JSON)
+    skills = Column(Text, nullable=True)  # Навыки (CSV: Python,Leadership,etc)
 
     # Documents
     cv_text = Column(Text, nullable=True)  # CV в текстовом формате

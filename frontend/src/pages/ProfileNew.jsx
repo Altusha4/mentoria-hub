@@ -46,6 +46,7 @@ export default function Profile({ studentId }) {
         sat_score: formData.sat_score || null,
         activities: formData.activities || null,
         certificates: formData.certificates || null,
+        skills: formData.skills || null,
         cv_text: formData.cv_text || null,
         motivation_letter: formData.motivation_letter || null,
       };
@@ -208,6 +209,23 @@ export default function Profile({ studentId }) {
         {/* TAB 3: Activities */}
         {activeTab === 'activities' && (
           <div className="space-y-6">
+            {/* Skills */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-3">💻 Technical & Soft Skills</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">E.g., "Python, Leadership, Data Analysis, Problem Solving"</p>
+              {editing ? (
+                <textarea
+                  value={formData.skills || ''}
+                  onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                  placeholder="List your skills (comma-separated)..."
+                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white"
+                  rows="2"
+                />
+              ) : (
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{formData.skills || '—'}</p>
+              )}
+            </div>
+
             {/* Sports & Activities */}
             <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-6">
               <h3 className="text-lg font-bold text-green-900 dark:text-green-300 mb-3">⚽ Sports & Activities</h3>

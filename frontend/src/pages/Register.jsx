@@ -24,6 +24,7 @@ export default function Register({ setStudentId }) {
     sat_score: '',
     activities: '',
     certificates: '',
+    skills: '',
     // Step 4: Documents & Security
     cv_text: '',
     motivation_letter: '',
@@ -119,6 +120,7 @@ export default function Register({ setStudentId }) {
         sat_score: formData.sat_score ? parseInt(formData.sat_score) : null,
         activities: formData.activities || '',
         certificates: formData.certificates || '',
+        skills: formData.skills || '',
         cv_text: formData.cv_text || '',
         motivation_letter: formData.motivation_letter || '',
       };
@@ -413,6 +415,17 @@ export default function Register({ setStudentId }) {
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
                     rows="2"
                     placeholder="E.g., Math Olympiad (1st), Cambridge English, Science Fair..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Skills</label>
+                  <textarea
+                    value={formData.skills}
+                    onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    rows="2"
+                    placeholder="E.g., Python, Leadership, Data Analysis, Problem Solving (comma-separated)"
                   />
                 </div>
               </div>

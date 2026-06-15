@@ -13,3 +13,11 @@ dist/
 node_modules/
 .next/
 backend/models/ml_recommender_model/model.safetensors
+
+# ML Models (large binary files)
+backend/models/ml_recommender_model/
+backend/models/ml_embeddings.json
+backend/models/*.zip
+
+# Training scripts output
+*.log

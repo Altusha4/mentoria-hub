@@ -2,12 +2,23 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from datetime import date
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
+from pydantic import BaseModel
 from ..database import get_db
 from ..models import Opportunity, SavedOpportunity, StudentProfile
 from ..schemas import Opportunity as OpportunitySchema, SavedOpportunityResponse
+from ..ml_service import success_chance_analyzer
 
 router = APIRouter(prefix="/api/opportunities", tags=["opportunities"])
+
+class SuccessChanceResponse(BaseModel):
+    success_probability: float  # 0-1
+    percentage: float  # 0-100
+    score_breakdown: Dict[str, float]
+    matching_skills: List[str]
+    missing_skills: List[str]
+    academic_details: Dict[str, Any]
+    recommendations: List[str]
 
 @router.get("/", response_model=List[OpportunitySchema])
 def list_opportunities(
@@ -99,3 +110,77 @@ def get_recommended_opportunities(student_id: int, db: Session = Depends(get_db)
         ))
 
     return query.order_by(Opportunity.deadline).all()
+
+@router.get("/{opportunity_id}/success-chance/{student_id}", response_model=SuccessChanceResponse)
+def analyze_success_chance(
+    opportunity_id: int,
+    student_id: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Анализирует вероятность получения оффера на программу
+
+    Args:
+        opportunity_id: ID программы/возможности
+        student_id: ID студента
+
+    Returns:
+        {
+            "success_probability": 0.75,  # 0-1
+            "percentage": 75.0,
+            "score_breakdown": {...},
+            "matching_skills": [...],
+            "missing_skills": [...],
+            "academic_details": {...},
+            "recommendations": [...]
+        }
+    """
+    # Получаем студента
+    student = db.query(StudentProfile).filter(StudentProfile.id == student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # Получаем программу
+    opportunity = db.query(Opportunity).filter(Opportunity.id == opportunity_id).first()
+    if not opportunity:
+        raise HTTPException(status_code=404, detail="Opportunity not found")
+
+    # Подготавливаем данные студента
+    student_profile = {
+        'interests': student.interests or '',
+        'subjects': student.subjects or '',
+        'goals': student.goals or '',
+        'bio': student.bio or '',
+        'cv_text': student.cv_text or '',
+        'activities': student.activities or '',
+        'certificates': student.certificates or '',
+        'skills': student.skills or '',  # NEW! Explicit skills
+        'motivation_letter': student.motivation_letter or '',
+        'grade': student.grade,
+        'gpa': student.gpa,
+        'ielts_score': student.ielts_score,
+        'toefl_score': student.toefl_score,
+        'sat_score': student.sat_score
+    }
+
+    # Подготавливаем данные программы
+    opportunity_data = {
+        'title': opportunity.title,
+        'direction': opportunity.direction,
+        'requirements': opportunity.requirements or '',
+        'grade_level': opportunity.grade_level
+    }
+
+    # Анализируем шансы
+    analysis = success_chance_analyzer.analyze_success_chance(student_profile, opportunity_data)
+
+    # Возвращаем результат
+    return {
+        'success_probability': analysis['success_probability'],
+        'percentage': round(analysis['success_probability'] * 100, 1),
+        'score_breakdown': analysis['score_breakdown'],
+        'matching_skills': analysis['matching_skills'],
+        'missing_skills': analysis['missing_skills'],
+        'academic_details': analysis['academic_details'],
+        'recommendations': analysis['recommendations']
+    }

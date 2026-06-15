@@ -71,6 +71,7 @@ class StudentProfileBase(BaseModel):
     # Activities & Achievements
     activities: Optional[str] = None
     certificates: Optional[str] = None
+    skills: Optional[str] = None
     # Documents
     cv_text: Optional[str] = None
     motivation_letter: Optional[str] = None
@@ -94,6 +95,7 @@ class StudentProfileUpdate(BaseModel):
     sat_score: Optional[int] = None
     activities: Optional[str] = None
     certificates: Optional[str] = None
+    skills: Optional[str] = None
     cv_text: Optional[str] = None
     motivation_letter: Optional[str] = None
 

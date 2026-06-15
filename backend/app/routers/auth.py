@@ -60,7 +60,7 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
 
     # Set None for any missing optional fields
     optional_fields = ['gpa', 'ielts_score', 'toefl_score', 'sat_score', 'activities',
-                      'certificates', 'cv_text', 'motivation_letter']
+                      'certificates', 'skills', 'cv_text', 'motivation_letter']
     for field in optional_fields:
         if field not in student_dict:
             student_dict[field] = None

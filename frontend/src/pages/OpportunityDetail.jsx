@@ -8,6 +8,9 @@ export default function OpportunityDetail({ studentId }) {
   const [opportunity, setOpportunity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [successChance, setSuccessChance] = useState(null);
+  const [showChanceModal, setShowChanceModal] = useState(false);
+  const [chanceLoading, setChanceLoading] = useState(false);
 
   useEffect(() => {
     fetchOpportunity();
@@ -55,6 +58,27 @@ export default function OpportunityDetail({ studentId }) {
       }
     } catch (error) {
       console.error('Error saving opportunity:', error);
+    }
+  };
+
+  const handleCheckChance = async () => {
+    if (!studentId) {
+      alert('Please login first');
+      return;
+    }
+
+    setChanceLoading(true);
+    try {
+      const response = await fetch(`http://localhost:8000/api/opportunities/${opportunity.id}/success-chance/${studentId}`);
+      if (!response.ok) throw new Error('Failed to fetch success chance');
+      const data = await response.json();
+      setSuccessChance(data);
+      setShowChanceModal(true);
+    } catch (error) {
+      console.error('Error checking success chance:', error);
+      alert('Failed to check success chance. Please try again.');
+    } finally {
+      setChanceLoading(false);
     }
   };
 
@@ -213,18 +237,28 @@ export default function OpportunityDetail({ studentId }) {
               </p>
             </div>
 
-            {/* CTA Button */}
-            <a
-              href={opportunity.apply_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full text-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg"
-            >
-              Apply Now →
-            </a>
+            {/* CTA Buttons */}
+            <div className="space-y-3">
+              <a
+                href={opportunity.apply_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg"
+              >
+                Apply Now →
+              </a>
+
+              <button
+                onClick={handleCheckChance}
+                disabled={chanceLoading}
+                className="block w-full text-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {chanceLoading ? '🔄 Analyzing...' : '✨ Check My Success Chance'}
+              </button>
+            </div>
 
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
-              You will be redirected to the official application page
+              AI will analyze your profile to estimate your chances
             </p>
           </div>
         </div>
@@ -247,6 +281,128 @@ export default function OpportunityDetail({ studentId }) {
           </Link>
         </div>
       </div>
+
+      {/* Success Chance Modal */}
+      {showChanceModal && successChance && (
+        <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            {/* Header */}
+            <div className="sticky top-0 flex items-center justify-between p-6 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 z-10">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Success Chance Analysis</h2>
+              <button
+                onClick={() => setShowChanceModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-8 space-y-6">
+              {/* Main Score */}
+              <div className="text-center">
+                <div className="text-6xl font-bold mb-2">
+                  {successChance.percentage >= 70 ? '🎉' : successChance.percentage >= 50 ? '🚀' : '💪'}
+                </div>
+                <div className="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                  {successChance.percentage.toFixed(0)}%
+                </div>
+                <p className="text-gray-600 dark:text-gray-400 text-lg">
+                  {successChance.percentage >= 70
+                    ? 'Strong chances! Your profile matches well'
+                    : successChance.percentage >= 50
+                    ? 'Moderate chances. You could improve your profile'
+                    : 'Low chances. Follow recommendations to improve'}
+                </p>
+              </div>
+
+              {/* Score Breakdown */}
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
+                <h3 className="font-bold text-gray-900 dark:text-white mb-4">📊 Score Breakdown</h3>
+                <div className="space-y-3">
+                  {[
+                    { label: 'Skill Match', value: successChance.score_breakdown.skill_match, color: 'blue' },
+                    { label: 'Semantic Match', value: successChance.score_breakdown.semantic_match, color: 'purple' },
+                    { label: 'Academic Score', value: successChance.score_breakdown.academic_score, color: 'green' },
+                    { label: 'Interest Match', value: successChance.score_breakdown.interest_match, color: 'orange' },
+                    { label: 'Profile Completeness', value: successChance.score_breakdown.profile_completeness, color: 'pink' },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center gap-4">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 w-32">{item.label}</span>
+                      <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                        <div
+                          className={`h-full bg-gradient-to-r from-${item.color}-400 to-${item.color}-600 transition-all`}
+                          style={{ width: `${Math.round(item.value * 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-bold text-gray-900 dark:text-white w-12 text-right">
+                        {Math.round(item.value * 100)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Matching Skills */}
+              {successChance.matching_skills.length > 0 && (
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-6">
+                  <h3 className="font-bold text-green-900 dark:text-green-300 mb-3">✅ Matching Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {successChance.matching_skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-3 py-1 bg-green-200 dark:bg-green-800 text-green-900 dark:text-green-200 text-sm font-semibold rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Missing Skills */}
+              {successChance.missing_skills.length > 0 && (
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-6">
+                  <h3 className="font-bold text-orange-900 dark:text-orange-300 mb-3">⚠️ Missing Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {successChance.missing_skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-3 py-1 bg-orange-200 dark:bg-orange-800 text-orange-900 dark:text-orange-200 text-sm font-semibold rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recommendations */}
+              {successChance.recommendations.length > 0 && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+                  <h3 className="font-bold text-blue-900 dark:text-blue-300 mb-3">💡 Recommendations to Improve</h3>
+                  <ul className="space-y-2">
+                    {successChance.recommendations.map((rec, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-blue-900 dark:text-blue-200 text-sm">
+                        <span className="text-lg">→</span>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Close Button */}
+              <button
+                onClick={() => setShowChanceModal(false)}
+                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
