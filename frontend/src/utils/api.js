@@ -38,13 +38,19 @@ export const api = {
   },
 
   login: async (email, password) => {
+    console.log('🌐 [API] Login attempt with:', { email, password });
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: getHeaders(),
       credentials: 'include', // Send cookies
       body: JSON.stringify({ email, password }),
     });
-    if (!response.ok) throw new Error('Login failed');
+    console.log('🌐 [API] Login response status:', response.status);
+    if (!response.ok) {
+      const error = await response.json();
+      console.log('🌐 [API] Login error:', error);
+      throw new Error('Login failed');
+    }
     return response.json();
   },
 

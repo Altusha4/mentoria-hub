@@ -1,9 +1,14 @@
 from datetime import date, timedelta, datetime
 from .database import SessionLocal
 from .models import StudentProfile, Opportunity, Course, Lesson, Quiz, TelegramPost
+from .auth import hash_password
+import random
 
 def seed_data():
     db = SessionLocal()
+
+    # Helper to get random avatar
+    AVATAR_EMOJIS = ['👤', '😊', '🎓', '🚀', '⭐', '💼', '🎯', '🌟', '💡', '🏆', '🎨', '🧠']
 
     # Create sample students
     students = [
@@ -15,6 +20,8 @@ def seed_data():
             interests="STEM,Programming",
             subjects="Mathematics,Physics",
             goals="University entrance",
+            password_hash=hash_password("password123"),
+            avatar_emoji=random.choice(AVATAR_EMOJIS),
         ),
         StudentProfile(
             email="student2@example.com",
@@ -24,6 +31,8 @@ def seed_data():
             interests="Business,Finance",
             subjects="Economics,English",
             goals="Business competition",
+            password_hash=hash_password("password123"),
+            avatar_emoji=random.choice(AVATAR_EMOJIS),
         ),
     ]
     for student in students:
