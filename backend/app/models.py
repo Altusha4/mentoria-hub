@@ -46,6 +46,8 @@ class StudentProfile(Base):
     enrollments = relationship("Enrollment", back_populates="student")
     lesson_progress = relationship("LessonProgress", back_populates="student")
     saved_opportunities = relationship("SavedOpportunity", back_populates="student")
+    notification_preference = relationship("NotificationPreference", back_populates="student", uselist=False)
+    notification_logs = relationship("NotificationLog", back_populates="student")
 
 class Opportunity(Base):
     __tablename__ = "opportunity"
@@ -140,6 +142,37 @@ class LessonProgress(Base):
 
     student = relationship("StudentProfile", back_populates="lesson_progress")
     lesson = relationship("Lesson", back_populates="progress")
+
+class NotificationPreference(Base):
+    __tablename__ = "notification_preference"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student_profile.id"), unique=True)
+    email_enabled = Column(Boolean, default=False)
+    telegram_enabled = Column(Boolean, default=False)
+    telegram_chat_id = Column(String, nullable=True)
+    deadline_alerts = Column(Boolean, default=True)
+    weekly_digest = Column(Boolean, default=True)
+    course_reminders = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student = relationship("StudentProfile", back_populates="notification_preference")
+
+class NotificationLog(Base):
+    __tablename__ = "notification_log"
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student_profile.id"))
+    channel = Column(String)
+    type = Column(String)
+    title = Column(String)
+    message = Column(Text)
+    status = Column(String)
+    error_message = Column(String, nullable=True)
+    sent_at = Column(DateTime, default=datetime.utcnow)
+
+    student = relationship("StudentProfile", back_populates="notification_logs")
 
 class TelegramPost(Base):
     __tablename__ = "telegram_posts"
