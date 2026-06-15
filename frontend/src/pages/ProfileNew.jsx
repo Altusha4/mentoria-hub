@@ -47,9 +47,7 @@ export default function Profile({ studentId }) {
         activities: formData.activities || null,
         certificates: formData.certificates || null,
         cv_text: formData.cv_text || null,
-        cv_video_url: formData.cv_video_url || null,
         motivation_letter: formData.motivation_letter || null,
-        transcript_url: formData.transcript_url || null,
       };
 
       console.log('💾 [PROFILE] Cleaned data to send:', updateData);
@@ -204,29 +202,6 @@ export default function Profile({ studentId }) {
               </div>
             ))}
 
-            {/* Transcript */}
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl p-6 md:col-span-2">
-              <h3 className="text-lg font-bold text-yellow-900 dark:text-yellow-300 mb-3">📋 Transcript/Certificate URL</h3>
-              {editing ? (
-                <input
-                  type="url"
-                  value={formData.transcript_url || ''}
-                  onChange={(e) => setFormData({ ...formData, transcript_url: e.target.value })}
-                  placeholder="https://example.com/transcript"
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white"
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300 break-all">
-                  {formData.transcript_url ? (
-                    <a href={formData.transcript_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      View Transcript
-                    </a>
-                  ) : (
-                    '—'
-                  )}
-                </p>
-              )}
-            </div>
           </div>
         )}
 
@@ -288,29 +263,6 @@ export default function Profile({ studentId }) {
               )}
             </div>
 
-            {/* CV Video */}
-            <div className="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-purple-900 dark:text-purple-300 mb-3">🎥 CV Video</h3>
-              {editing ? (
-                <input
-                  type="url"
-                  value={formData.cv_video_url || ''}
-                  onChange={(e) => setFormData({ ...formData, cv_video_url: e.target.value })}
-                  placeholder="https://youtube.com/... or https://vimeo.com/..."
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white"
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300 break-all">
-                  {formData.cv_video_url ? (
-                    <a href={formData.cv_video_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      Watch CV Video
-                    </a>
-                  ) : (
-                    '—'
-                  )}
-                </p>
-              )}
-            </div>
 
             {/* Motivation Letter */}
             <div className="bg-pink-50 dark:bg-pink-900/20 border-2 border-pink-200 dark:border-pink-800 rounded-xl p-6">

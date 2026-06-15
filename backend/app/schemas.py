@@ -73,9 +73,7 @@ class StudentProfileBase(BaseModel):
     certificates: Optional[str] = None
     # Documents
     cv_text: Optional[str] = None
-    cv_video_url: Optional[str] = None
     motivation_letter: Optional[str] = None
-    transcript_url: Optional[str] = None
 
 class StudentProfileCreate(StudentProfileBase):
     password: str  # Пароль в открытом виде (будет захеширован на бэке)
@@ -97,9 +95,7 @@ class StudentProfileUpdate(BaseModel):
     activities: Optional[str] = None
     certificates: Optional[str] = None
     cv_text: Optional[str] = None
-    cv_video_url: Optional[str] = None
     motivation_letter: Optional[str] = None
-    transcript_url: Optional[str] = None
 
 class StudentProfile(StudentProfileBase):
     id: int

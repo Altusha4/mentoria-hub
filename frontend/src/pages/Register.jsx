@@ -26,9 +26,7 @@ export default function Register({ setStudentId }) {
     certificates: '',
     // Step 4: Documents & Security
     cv_text: '',
-    cv_video_url: '',
     motivation_letter: '',
-    transcript_url: '',
     password: '',
   });
   const [captchaVerified, setCaptchaVerified] = useState(false);
@@ -122,9 +120,7 @@ export default function Register({ setStudentId }) {
         activities: formData.activities || '',
         certificates: formData.certificates || '',
         cv_text: formData.cv_text || '',
-        cv_video_url: formData.cv_video_url || '',
         motivation_letter: formData.motivation_letter || '',
-        transcript_url: formData.transcript_url || '',
       };
 
       const response = await api.register(payload);
@@ -452,27 +448,6 @@ export default function Register({ setStudentId }) {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">CV Video URL</label>
-                    <input
-                      type="url"
-                      value={formData.cv_video_url}
-                      onChange={(e) => setFormData({ ...formData, cv_video_url: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
-                      placeholder="https://youtube.com/... or https://vimeo.com/..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Transcript/Certificate URL</label>
-                    <input
-                      type="url"
-                      value={formData.transcript_url}
-                      onChange={(e) => setFormData({ ...formData, transcript_url: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
-                      placeholder="https://..."
-                    />
-                  </div>
                 </div>
 
                 <div className="border-t-2 border-gray-200 pt-6">

@@ -37,9 +37,7 @@ class StudentProfile(Base):
 
     # Documents
     cv_text = Column(Text, nullable=True)  # CV в текстовом формате
-    cv_video_url = Column(String, nullable=True)  # Видео CV
     motivation_letter = Column(Text, nullable=True)  # Мотивационное письмо
-    transcript_url = Column(String, nullable=True)  # Ссылка на транскрипт/аттестат
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
