@@ -1,6 +1,9 @@
 from datetime import date, timedelta, datetime
 from .database import SessionLocal
-from .models import StudentProfile, Opportunity, Course, Lesson, Quiz, TelegramPost
+from .models import (
+    StudentProfile, Opportunity, Course, Lesson, Quiz, TelegramPost,
+    SavedOpportunity, Enrollment, LessonProgress,
+)
 from .auth import hash_password
 import random
 
@@ -73,6 +76,28 @@ def seed_data():
             requirements="Python programming knowledge, teamwork skills",
             grade_level="10-11",
             tags="Programming,AI,Hackathon,Technology",
+        ),
+        Opportunity(
+            title="STEM Regional Olympiad",
+            category="олимпиада",
+            direction="STEM",
+            format="offline",
+            deadline=date.today() + timedelta(days=1),
+            description="Regional competition in mathematics and science for top students. Last chance to register!",
+            requirements="Strong math and science background, grade 9-11",
+            grade_level="9-11",
+            tags="STEM,Olympiad,Math,Science,Urgent",
+        ),
+        Opportunity(
+            title="Young Entrepreneurs Competition",
+            category="конкурс",
+            direction="Business",
+            format="online",
+            deadline=date.today() + timedelta(days=3),
+            description="Present your business idea to a panel of investors and win funding.",
+            requirements="Business plan, entrepreneurial mindset",
+            grade_level="8-11",
+            tags="Business,Entrepreneurship,Competition",
         ),
         Opportunity(
             title="Financial Literacy Scholarship",
@@ -221,6 +246,37 @@ def seed_data():
                 )
                 db.add(lesson)
     db.commit()
+
+    # Create saved opportunities and enrollments for demo student (student1)
+    student1 = db.query(StudentProfile).filter(StudentProfile.email == "student1@example.com").first()
+    if student1:
+        stem_olympiad = db.query(Opportunity).filter(Opportunity.title == "STEM Regional Olympiad").first()
+        entrepreneurs = db.query(Opportunity).filter(Opportunity.title == "Young Entrepreneurs Competition").first()
+        hackathon = db.query(Opportunity).filter(Opportunity.title == "AI & Machine Learning Hackathon").first()
+
+        for opp in [stem_olympiad, entrepreneurs, hackathon]:
+            if opp:
+                db.add(SavedOpportunity(student_id=student1.id, opportunity_id=opp.id))
+
+        english_course = db.query(Course).filter(Course.title == "English for Academic Success").first()
+        python_course = db.query(Course).filter(Course.title == "Python Programming Fundamentals").first()
+
+        if english_course:
+            enrollment = Enrollment(student_id=student1.id, course_id=english_course.id, progress=33.0)
+            db.add(enrollment)
+            first_lesson = db.query(Lesson).filter(
+                Lesson.course_id == english_course.id, Lesson.order == 1
+            ).first()
+            if first_lesson:
+                db.add(LessonProgress(
+                    student_id=student1.id, lesson_id=first_lesson.id,
+                    completed=True, quiz_passed=True,
+                ))
+
+        if python_course:
+            db.add(Enrollment(student_id=student1.id, course_id=python_course.id, progress=0.0))
+
+        db.commit()
 
     # Create sample Telegram posts
     telegram_posts = [

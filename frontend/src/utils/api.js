@@ -271,4 +271,71 @@ export const api = {
     });
     return response.json();
   },
+
+  // Mentoria Guardian Notifications
+  getNotificationPreferences: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/preferences/${studentId}`);
+    if (!response.ok) throw new Error('Failed to fetch preferences');
+    return response.json();
+  },
+
+  updateNotificationPreferences: async (studentId, data) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/preferences/${studentId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to update preferences');
+    return response.json();
+  },
+
+  sendTestEmail: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/test-email/${studentId}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  sendTestTelegram: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/test-telegram/${studentId}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  getDigestPreview: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/digest/${studentId}`);
+    if (!response.ok) throw new Error('Failed to fetch digest');
+    return response.json();
+  },
+
+  sendDigest: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/send-digest/${studentId}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  runDeadlineScan: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/deadline-scan/${studentId}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  getNotificationLogs: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/logs/${studentId}`);
+    if (!response.ok) throw new Error('Failed to fetch logs');
+    return response.json();
+  },
+
+  getTelegramLink: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/telegram-link/${studentId}`);
+    return response.json();
+  },
+
+  pollTelegramConnection: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/notifications/telegram-poll/${studentId}`, { method: 'POST' });
+    return response.json();
+  },
 };
