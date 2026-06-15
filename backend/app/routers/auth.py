@@ -23,18 +23,31 @@ class RefreshTokenRequest(BaseModel):
 
 @router.post("/register", response_model=TokenResponse)
 def register(student: StudentProfileCreate, response: Response, db: Session = Depends(get_db)):
+    print(f"\n🔍 [REGISTER] Email: {student.email}")
+
     # Check if email already exists
+    print(f"🔍 [REGISTER] Checking if email exists in DB...")
     existing = db.query(StudentProfile).filter(StudentProfile.email == student.email).first()
+
     if existing:
+        print(f"❌ [REGISTER] Email {student.email} already exists! ID: {existing.id}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+
+    print(f"✅ [REGISTER] Email {student.email} is free")
 
     # Create new student with hashed password
     student_dict = student.dict()
     password = student_dict.pop("password")
+    print(f"🔐 [REGISTER] Hashing password for {student.email}...")
+
     db_student = StudentProfile(**student_dict, password_hash=hash_password(password))
+    print(f"💾 [REGISTER] Adding student to DB: {student.email}")
+
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
+
+    print(f"✅ [REGISTER] Student created! ID: {db_student.id}, Email: {db_student.email}")
 
     # Generate tokens
     access_token = create_access_token(data={"sub": db_student.id})
@@ -59,14 +72,25 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
 
 @router.post("/login", response_model=TokenResponse)
 def login(request: LoginRequest, response: Response, db: Session = Depends(get_db)):
+    print(f"\n🔍 [LOGIN] Email: {request.email}")
+
     # Find student by email
+    print(f"🔍 [LOGIN] Looking for student in DB...")
     student = db.query(StudentProfile).filter(StudentProfile.email == request.email).first()
+
     if not student:
+        print(f"❌ [LOGIN] Email {request.email} not found in DB")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
+    print(f"✅ [LOGIN] Found student: ID {student.id}")
+
     # Verify password
+    print(f"🔐 [LOGIN] Verifying password...")
     if not verify_password(request.password, student.password_hash):
+        print(f"❌ [LOGIN] Password incorrect for {request.email}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+
+    print(f"✅ [LOGIN] Password correct, generating tokens...")
 
     # Generate tokens
     access_token = create_access_token(data={"sub": student.id})

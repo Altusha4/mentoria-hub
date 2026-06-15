@@ -34,16 +34,22 @@ register_admin(admin)
 
 @app.on_event("startup")
 def startup_event():
-    """Initialize admin panel and seed data if empty."""
+    """Initialize database with tables and seed data if empty."""
     from .database import SessionLocal
+
+    # Create all tables
+    init_db()
+
+    # Seed mock data only if database is completely empty
     db = SessionLocal()
     from .models import StudentProfile
+    try:
+        if db.query(StudentProfile).count() == 0:
+            print("Database empty, seeding mock data...")
+            seed_data()
+    finally:
+        db.close()
 
-    if db.query(StudentProfile).count() == 0:
-        print("Database is empty, seeding with mock data...")
-        seed_data()
-
-    db.close()
     print("✅ Mentoria Hub API is running!")
 
 @app.get("/")
