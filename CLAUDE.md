@@ -6,22 +6,32 @@
 
 ## ТЕКУЩИЙ СТАТУС (мы вот здесь)
 
-### ✅ ФАЗА 1 ЗАВЕРШЕНА: Фундамент бэкенда
+### ✅ ФАЗА 1 + ФАЗА 2 ЗАВЕРШЕНЫ
 
-- ✅ Проект создан в PyCharm: `~/IdeaProjects/mentoria-hub`
-- ✅ Виртуальное окружение `.venv` (Python 3.12)
-- ✅ Структура монорепо: `backend/` (FastAPI) + `frontend/` (React позже)
+#### **Фаза 1: Бэкенд (FastAPI)**
 - ✅ FastAPI + uvicorn, SQLAlchemy, sqladmin установлены
-- ✅ SQLite БД + ORM-модели описаны (8 моделей: StudentProfile, Opportunity, SavedOpportunity, Course, Lesson, Quiz, Enrollment, LessonProgress)
-- ✅ Pydantic-схемы созданы (Opportunity, Course, Lesson, etc.)
-- ✅ API-роуты реализованы: `/api/opportunities/` (с фильтрами), `/api/courses/`, `/api/courses/lesson/{id}` 
-- ✅ sqladmin админ-панель подключена → `/admin`
-- ✅ CORSMiddleware добавлен
-- ✅ Mock-данные засеяны: 10 возможностей, 3 курса, 8+ уроков
-- ✅ Сервер работает: `uvicorn backend.app.main:app --reload`
-- ✅ `/docs` (Swagger) и `/api/health` проверены
+- ✅ SQLite БД + ORM-модели (8 моделей)
+- ✅ Pydantic-схемы для API
+- ✅ API-роуты с фильтрами (opportunities, courses)
+- ✅ sqladmin админ-панель (`/admin`)
+- ✅ Mock-данные: 10 возможностей, 3 курса, 8+ уроков
+- ✅ CORS + Swagger UI (`/docs`)
 
-**СЛЕДУЮЩИЙ ШАГ:** Фаза 2 — студенческая часть (главная, каталог, курсы, личный кабинет)
+#### **Фаза 2: Фронтенд (React + Vite)**
+- ✅ React + Vite + Tailwind CSS (CDN) установлены
+- ✅ React Router с 6 страницами:
+  - Home (герой, фичи, CTA)
+  - Opportunities (каталог с фильтрами, сохранение)
+  - Courses (сетка курсов, прогресс)
+  - Course (детали курса, список уроков)
+  - Lesson (видео, контент, мини-тест, завершение)
+  - Profile (мои курсы, сохранённое, прогресс)
+- ✅ Компоненты: Header, Footer, OpportunityCard, CourseCard
+- ✅ API утилиты для всех эндпоинтов
+- ✅ Mentoria логотип интегрирован
+- ✅ Tailwind CSS для стиля (адаптивный дизайн)
+
+**СЛЕДУЮЩИЙ ШАГ:** Фаза 3 — онбординг, аутентификация и рекомендации
 
 ## Что строим
 
