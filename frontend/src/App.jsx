@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Search from './pages/Search';
 import Leaderboard from './pages/Leaderboard';
 import Updates from './pages/Updates';
+import OpportunityDetail from './pages/OpportunityDetail';
 import './index.css';
 
 export default function App() {
@@ -64,6 +65,10 @@ export default function App() {
             <Route
               path="/opportunities"
               element={studentId ? <Opportunities studentId={studentId} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/opportunities/:id"
+              element={studentId ? <OpportunityDetail studentId={studentId} /> : <Navigate to="/login" />}
             />
             <Route
               path="/courses"
