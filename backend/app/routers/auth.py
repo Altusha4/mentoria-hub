@@ -3,13 +3,14 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import StudentProfile
 from ..schemas import StudentProfileCreate, StudentProfile as StudentProfileSchema
-from ..auth import create_access_token, create_refresh_token, verify_token
+from ..auth import create_access_token, create_refresh_token, verify_token, hash_password, verify_password
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 class LoginRequest(BaseModel):
     email: str
+    password: str
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -27,8 +28,10 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
-    # Create new student
-    db_student = StudentProfile(**student.dict())
+    # Create new student with hashed password
+    student_dict = student.dict()
+    password = student_dict.pop("password")
+    db_student = StudentProfile(**student_dict, password_hash=hash_password(password))
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
@@ -59,7 +62,11 @@ def login(request: LoginRequest, response: Response, db: Session = Depends(get_d
     # Find student by email
     student = db.query(StudentProfile).filter(StudentProfile.email == request.email).first()
     if not student:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or student not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
+
+    # Verify password
+    if not verify_password(request.password, student.password_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
 
     # Generate tokens
     access_token = create_access_token(data={"sub": student.id})
