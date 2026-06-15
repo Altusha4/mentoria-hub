@@ -244,7 +244,7 @@ export default function ProfileNew({ studentId }) {
                 disabled={saving}
                 className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
               >
-                {saving ? '⏳ Сохраняю...' : '💾 Сохранить'}
+                {saving ? '⏳ Saving...' : '💾 Save'}
               </button>
             </div>
           )}
@@ -253,10 +253,10 @@ export default function ProfileNew({ studentId }) {
           {activeTab === 'interests' && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                Мои интересы
+                My Interests
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Выбери свои интересы для получения персональных рекомендаций
+                Choose your interests to receive personalized recommendations
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
@@ -278,7 +278,7 @@ export default function ProfileNew({ studentId }) {
               {selectedInterests.length > 0 && (
                 <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                   <p className="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">
-                    Выбранные интересы:
+                    Selected Interests:
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {selectedInterests.map(interest => (
@@ -298,7 +298,7 @@ export default function ProfileNew({ studentId }) {
                 disabled={saving}
                 className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
               >
-                {saving ? '⏳ Сохраняю...' : '💾 Сохранить интересы'}
+                {saving ? '⏳ Saving...' : '💾 Save Interests'}
               </button>
             </div>
           )}
@@ -307,7 +307,7 @@ export default function ProfileNew({ studentId }) {
           {activeTab === 'courses' && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                Мои курсы ({enrolledCourses.length})
+                My Courses ({enrolledCourses.length})
               </h2>
 
               {enrolledCourses.length > 0 ? (
@@ -339,7 +339,7 @@ export default function ProfileNew({ studentId }) {
                 </div>
               ) : (
                 <p className="text-gray-600 dark:text-gray-400 text-center py-8">
-                  Ты еще не записался на курсы. <a href="/courses" className="text-blue-600 hover:underline">Выбери курс →</a>
+                  You haven't enrolled in any courses yet. <a href="/courses" className="text-blue-600 hover:underline">Browse Courses →</a>
                 </p>
               )}
             </div>
@@ -349,7 +349,7 @@ export default function ProfileNew({ studentId }) {
           {activeTab === 'saved' && (
             <div>
               <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-                Сохраненные возможности ({savedOpportunities.length})
+                Saved Opportunities ({savedOpportunities.length})
               </h2>
 
               {savedOpportunities.length > 0 ? (
@@ -375,7 +375,7 @@ export default function ProfileNew({ studentId }) {
                 </div>
               ) : (
                 <p className="text-gray-600 dark:text-gray-400 text-center py-8">
-                  Ты еще ничего не сохранил. <a href="/opportunities" className="text-blue-600 hover:underline">Обозри возможности →</a>
+                  You haven't saved any opportunities yet. <a href="/opportunities" className="text-blue-600 hover:underline">Explore Opportunities →</a>
                 </p>
               )}
             </div>
