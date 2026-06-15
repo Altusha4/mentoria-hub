@@ -5,6 +5,7 @@ import { api } from '../utils/api';
 export default function Login({ setStudentId }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -14,7 +15,7 @@ export default function Login({ setStudentId }) {
     setLoading(true);
 
     try {
-      const response = await api.login(email);
+      const response = await api.login(email, password);
 
       // Save access token in memory (sessionStorage for security)
       sessionStorage.setItem('accessToken', response.access_token);
@@ -29,7 +30,7 @@ export default function Login({ setStudentId }) {
       // Redirect to home
       navigate('/');
     } catch (err) {
-      setError('Login failed. Please check your email and try again.');
+      setError('Login failed. Please check your email and password.');
       console.error('Login error:', err);
     } finally {
       setLoading(false);
@@ -61,6 +62,18 @@ export default function Login({ setStudentId }) {
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="you@example.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="••••••••"
             />
           </div>
 
