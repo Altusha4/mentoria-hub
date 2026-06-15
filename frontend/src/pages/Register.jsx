@@ -15,6 +15,7 @@ export default function Register({ setStudentId }) {
     interests: [],
     subjects: [],
     goals: '',
+    bio: '',
   });
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -262,13 +263,24 @@ export default function Register({ setStudentId }) {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Your Goals</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Your Goals & Ambitions</label>
                 <textarea
                   value={formData.goals}
                   onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  rows="3"
+                  rows="2"
                   placeholder="E.g., Get into a top university, learn programming, win a competition..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Tell Us About Yourself</label>
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows="3"
+                  placeholder="Share your background, achievements, skills, or why you're interested in learning. This helps us recommend better opportunities and courses."
                 />
               </div>
             </div>

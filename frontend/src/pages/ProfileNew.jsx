@@ -14,6 +14,7 @@ export default function ProfileNew({ studentId }) {
   const [savedOpportunities, setSavedOpportunities] = useState([]);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [selectedAvatar, setSelectedAvatar] = useState('👤');
+  const [bio, setBio] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -36,6 +37,7 @@ export default function ProfileNew({ studentId }) {
       const interests = studentData.interests ? studentData.interests.split(',').map(i => i.trim()) : [];
       setSelectedInterests(interests);
       setSelectedAvatar(studentData.avatar_emoji || '👤');
+      setBio(studentData.bio || '');
     } catch (error) {
       console.error('Error fetching profile data:', error);
     } finally {
@@ -56,7 +58,8 @@ export default function ProfileNew({ studentId }) {
     try {
       await api.updateStudent(studentId, {
         interests: selectedInterests.join(', '),
-        avatar_emoji: selectedAvatar
+        avatar_emoji: selectedAvatar,
+        bio: bio
       });
 
       // Update local storage of interests
@@ -66,7 +69,8 @@ export default function ProfileNew({ studentId }) {
       setStudent(prev => ({
         ...prev,
         interests: selectedInterests.join(', '),
-        avatar_emoji: selectedAvatar
+        avatar_emoji: selectedAvatar,
+        bio: bio
       }));
 
       alert('✅ Profile updated!');
@@ -236,6 +240,22 @@ export default function ProfileNew({ studentId }) {
                     disabled
                     className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    About You (Bio)
+                  </label>
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Share your background, achievements, skills, and goals..."
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    rows="4"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    This helps us recommend better opportunities and courses
+                  </p>
                 </div>
               </div>
 

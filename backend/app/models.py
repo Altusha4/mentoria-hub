@@ -22,6 +22,7 @@ class StudentProfile(Base):
     interests = Column(String)  # JSON или CSV, например "STEM,Business"
     subjects = Column(String)
     goals = Column(String)
+    bio = Column(Text, nullable=True)  # О себе: амбиции, цели, интересы
     avatar_emoji = Column(String, default="👤")  # Аватар как эмодзи
     created_at = Column(DateTime, default=datetime.utcnow)
 

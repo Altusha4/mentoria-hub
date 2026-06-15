@@ -62,6 +62,7 @@ class StudentProfileBase(BaseModel):
     interests: Optional[str] = None
     subjects: Optional[str] = None
     goals: Optional[str] = None
+    bio: Optional[str] = None
 
 class StudentProfileCreate(StudentProfileBase):
     password: str  # Пароль в открытом виде (будет захеширован на бэке)
