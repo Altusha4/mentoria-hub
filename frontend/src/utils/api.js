@@ -22,12 +22,12 @@ export const api = {
     return response.json();
   },
 
-  login: async (email) => {
+  login: async (email, password) => {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: getHeaders(),
       credentials: 'include', // Send cookies
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, password }),
     });
     if (!response.ok) throw new Error('Login failed');
     return response.json();
