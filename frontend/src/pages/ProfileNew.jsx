@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
-import GuardianCenter from '../components/GuardianCenter';
-
 export default function Profile({ studentId }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -107,7 +105,6 @@ export default function Profile({ studentId }) {
             { id: 'academics',  label: '🎓 Academic Stats' },
             { id: 'activities', label: '⭐ Activities' },
             { id: 'documents',  label: '📄 Documents' },
-            { id: 'guardian',   label: '🛡️ Guardian' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -124,7 +121,7 @@ export default function Profile({ studentId }) {
         </div>
 
         {/* Edit Button */}
-        {!editing && activeTab !== 'guardian' && (
+        {!editing && (
           <button
             onClick={() => setEditing(true)}
             className="mb-6 px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
@@ -302,13 +299,8 @@ export default function Profile({ studentId }) {
           </div>
         )}
 
-        {/* TAB 5: Guardian */}
-        {activeTab === 'guardian' && (
-          <GuardianCenter studentId={studentId} />
-        )}
-
         {/* Save/Cancel Buttons */}
-        {editing && activeTab !== 'guardian' && (
+        {editing && (
           <div className="flex gap-3 mt-8 sticky bottom-4">
             <button
               onClick={handleSave}

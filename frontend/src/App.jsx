@@ -14,6 +14,7 @@ import Register from './pages/Register';
 import Search from './pages/Search';
 import Updates from './pages/Updates';
 import OpportunityDetail from './pages/OpportunityDetail';
+import Guardian from './pages/Guardian';
 import './index.css';
 
 function AppContent({ studentId, setStudentId, handleLogout }) {
@@ -69,6 +70,10 @@ function AppContent({ studentId, setStudentId, handleLogout }) {
           <Route
             path="/updates"
             element={studentId ? <Updates /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/guardian"
+            element={studentId ? <Guardian studentId={studentId} /> : <Navigate to="/login" />}
           />
 
           {/* Redirect unknown routes */}

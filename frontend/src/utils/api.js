@@ -338,4 +338,40 @@ export const api = {
     const response = await fetch(`${API_BASE_URL}/notifications/telegram-poll/${studentId}`, { method: 'POST' });
     return response.json();
   },
+
+  getGuardianMission: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/guardian/mission/${studentId}`);
+    if (!response.ok) throw new Error('Failed to fetch guardian mission');
+    return response.json();
+  },
+
+  getOpportunityReadiness: async (studentId, opportunityId) => {
+    const response = await fetch(`${API_BASE_URL}/guardian/readiness/${studentId}/${opportunityId}`);
+    if (!response.ok) throw new Error('Failed to fetch readiness');
+    return response.json();
+  },
+
+  updateOpportunityStage: async (studentId, opportunityId, stage) => {
+    const response = await fetch(`${API_BASE_URL}/guardian/journey/${studentId}/${opportunityId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stage }),
+    });
+    if (!response.ok) throw new Error('Failed to update stage');
+    return response.json();
+  },
+
+  sendGuardianEmailReport: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/guardian/email-report/${studentId}`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  pollBotCommands: async () => {
+    const response = await fetch(`${API_BASE_URL}/guardian/bot-poll`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
 };
