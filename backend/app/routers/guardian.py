@@ -115,6 +115,8 @@ def _build_watchlist_item(student_id: int, student: StudentProfile, opp: Opportu
         "deadline": opp.deadline.isoformat() if opp.deadline else None,
         "days_left": days_left,
         "apply_url": opp.apply_url,
+        "source_url": opp.source_url,
+        "effective_url": opp.apply_url or opp.source_url,
         "readiness_score": readiness_data["readiness_score"],
         "factor_scores": readiness_data["factor_scores"],
         "missing_steps": readiness_data["missing_steps"],
@@ -165,6 +167,7 @@ def get_recommendations(student_id: int, limit: int = 5, db: Session = Depends(g
             "deadline": opp.deadline.isoformat() if opp.deadline else None,
             "days_left": days if days != 9999 else None,
             "description": (opp.description or "")[:150],
+            "source_url": opp.source_url,
             "match_reason": reason,
         }
         for score, days, opp, reason in scored[:limit]

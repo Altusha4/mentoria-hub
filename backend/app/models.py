@@ -62,7 +62,8 @@ class Opportunity(Base):
     description = Column(Text)
     requirements = Column(Text)
     apply_url = Column(String, nullable=True)
-    grade_level = Column(String)  # e.g., "8-9,10-11"
+    source_url = Column(String, nullable=True)
+    grade_level = Column(String)
     tags = Column(String)  # JSON или CSV
     created_at = Column(DateTime, default=datetime.utcnow)
 

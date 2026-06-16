@@ -152,6 +152,8 @@ def compute_mission(student_id: int, student: StudentProfile, db: Session) -> di
             "deadline": opp.deadline.isoformat() if opp.deadline else None,
             "days_left": days_left,
             "apply_url": opp.apply_url,
+            "source_url": opp.source_url,
+            "effective_url": opp.apply_url or opp.source_url,
             "readiness_score": readiness_data["readiness_score"],
             "factor_scores": readiness_data["factor_scores"],
             "missing_steps": readiness_data["missing_steps"],
