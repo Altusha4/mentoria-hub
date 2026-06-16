@@ -97,7 +97,7 @@ export default function Welcome() {
       <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
 
       {/* Контент */}
-      <div className="relative z-10 max-w-7xl w-full">
+      <div className="relative z-10 max-w-4xl w-full min-h-screen flex flex-col justify-center">
         <div className="flex items-center gap-6 md:gap-8 lg:gap-12">
           {/* Маскот - слева */}
           <div className="hidden md:flex justify-center items-center flex-shrink-0 w-80 lg:w-96">
