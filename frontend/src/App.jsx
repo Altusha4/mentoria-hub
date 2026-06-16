@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import Welcome from './pages/Welcome';
 import Home from './pages/Home';
 import Opportunities from './pages/Opportunities';
 import Courses from './pages/Courses';
@@ -25,6 +26,9 @@ function AppContent({ studentId, setStudentId, handleLogout }) {
 
       <main className="flex-1">
         <Routes>
+          {/* Welcome page - shown to everyone */}
+          <Route path="/welcome" element={<Welcome />} />
+
           {/* Public routes - Auth */}
           <Route path="/login" element={<Login setStudentId={setStudentId} />} />
           <Route path="/register" element={<Register setStudentId={setStudentId} />} />
@@ -32,7 +36,7 @@ function AppContent({ studentId, setStudentId, handleLogout }) {
           {/* Protected routes - redirect to login if not logged in */}
           <Route
             path="/"
-            element={studentId ? <Home studentId={studentId} /> : <Navigate to="/login" />}
+            element={studentId ? <Home studentId={studentId} /> : <Navigate to="/welcome" />}
           />
           <Route
             path="/opportunities"
