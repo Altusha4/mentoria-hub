@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../utils/api';
+import GuardianCenter from '../components/GuardianCenter';
 
 export default function Profile({ studentId }) {
   const [profile, setProfile] = useState(null);
@@ -102,10 +103,11 @@ export default function Profile({ studentId }) {
         {/* Tab Navigation */}
         <div className="flex gap-2 mb-8 overflow-x-auto border-b border-gray-200 dark:border-slate-700">
           {[
-            { id: 'overview', label: '📊 Overview', icon: '📊' },
-            { id: 'academics', label: '🎓 Academic Stats', icon: '🎓' },
-            { id: 'activities', label: '⭐ Activities', icon: '⭐' },
-            { id: 'documents', label: '📄 Documents', icon: '📄' },
+            { id: 'overview',   label: '📊 Overview' },
+            { id: 'academics',  label: '🎓 Academic Stats' },
+            { id: 'activities', label: '⭐ Activities' },
+            { id: 'documents',  label: '📄 Documents' },
+            { id: 'guardian',   label: '🛡️ Guardian' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -122,7 +124,7 @@ export default function Profile({ studentId }) {
         </div>
 
         {/* Edit Button */}
-        {!editing && (
+        {!editing && activeTab !== 'guardian' && (
           <button
             onClick={() => setEditing(true)}
             className="mb-6 px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors"
@@ -300,8 +302,13 @@ export default function Profile({ studentId }) {
           </div>
         )}
 
+        {/* TAB 5: Guardian */}
+        {activeTab === 'guardian' && (
+          <GuardianCenter studentId={studentId} />
+        )}
+
         {/* Save/Cancel Buttons */}
-        {editing && (
+        {editing && activeTab !== 'guardian' && (
           <div className="flex gap-3 mt-8 sticky bottom-4">
             <button
               onClick={handleSave}

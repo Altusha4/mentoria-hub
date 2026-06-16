@@ -1,5 +1,8 @@
 from sqladmin import ModelView
-from .models import StudentProfile, Opportunity, SavedOpportunity, Course, Lesson, Quiz, Enrollment, LessonProgress
+from .models import (
+    StudentProfile, Opportunity, SavedOpportunity, Course, Lesson, Quiz,
+    Enrollment, LessonProgress, NotificationPreference, NotificationLog,
+)
 
 class StudentProfileAdmin(ModelView, model=StudentProfile):
     name = "Student"
@@ -39,6 +42,29 @@ class LessonProgressAdmin(ModelView, model=LessonProgress):
     name_plural = "Lesson Progresses"
     column_list = [LessonProgress.id, LessonProgress.student_id, LessonProgress.lesson_id, LessonProgress.completed]
 
+class NotificationPreferenceAdmin(ModelView, model=NotificationPreference):
+    name = "Notification Preference"
+    name_plural = "Notification Preferences"
+    column_list = [
+        NotificationPreference.id,
+        NotificationPreference.student_id,
+        NotificationPreference.email_enabled,
+        NotificationPreference.telegram_enabled,
+        NotificationPreference.telegram_chat_id,
+    ]
+
+class NotificationLogAdmin(ModelView, model=NotificationLog):
+    name = "Notification Log"
+    name_plural = "Notification Logs"
+    column_list = [
+        NotificationLog.id,
+        NotificationLog.student_id,
+        NotificationLog.channel,
+        NotificationLog.type,
+        NotificationLog.status,
+        NotificationLog.sent_at,
+    ]
+
 def register_admin(admin):
     admin.add_view(StudentProfileAdmin)
     admin.add_view(OpportunityAdmin)
@@ -48,3 +74,5 @@ def register_admin(admin):
     admin.add_view(QuizAdmin)
     admin.add_view(EnrollmentAdmin)
     admin.add_view(LessonProgressAdmin)
+    admin.add_view(NotificationPreferenceAdmin)
+    admin.add_view(NotificationLogAdmin)
