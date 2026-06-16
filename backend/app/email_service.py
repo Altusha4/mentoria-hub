@@ -5,12 +5,12 @@ from email.mime.text import MIMEText
 from datetime import datetime
 from typing import Optional
 
-SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER = os.getenv("SMTP_USER", "")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-FROM_EMAIL = os.getenv("FROM_EMAIL", "") or SMTP_USER
-APP_URL = os.getenv("APP_URL", "http://localhost:5173")
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com").strip()
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587").strip())
+SMTP_USER = os.getenv("SMTP_USER", "").strip()
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
+FROM_EMAIL = (os.getenv("FROM_EMAIL", "") or SMTP_USER).strip()
+APP_URL = os.getenv("APP_URL", "http://localhost:5173").strip()
 
 
 def is_configured() -> bool:

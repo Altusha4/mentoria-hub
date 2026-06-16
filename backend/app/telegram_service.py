@@ -1,26 +1,39 @@
 import os
 import json
+import ssl
 import urllib.request
 from typing import Optional
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-APP_URL = os.getenv("APP_URL", "http://localhost:5173")
+import certifi
+
+
+def _ssl_ctx() -> ssl.SSLContext:
+    return ssl.create_default_context(cafile=certifi.where())
+
+
+def _token() -> str:
+    return os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+
+
+def _app_url() -> str:
+    return os.getenv("APP_URL", "http://localhost:5173").strip()
 
 
 def is_configured() -> bool:
-    return bool(TELEGRAM_BOT_TOKEN)
+    return bool(_token())
 
 
 def send_telegram_message(chat_id: str, text: str) -> tuple[bool, Optional[str]]:
-    if not is_configured():
+    token = _token()
+    if not token:
         return False, "Telegram bot not configured (missing TELEGRAM_BOT_TOKEN env var)"
     if not chat_id:
         return False, "No Telegram chat_id configured for this student"
     try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
         payload = json.dumps({"chat_id": chat_id, "text": text, "parse_mode": "HTML"}).encode("utf-8")
         req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=10, context=_ssl_ctx()) as resp:
             result = json.loads(resp.read())
             if result.get("ok"):
                 return True, None
@@ -30,6 +43,7 @@ def send_telegram_message(chat_id: str, text: str) -> tuple[bool, Optional[str]]
 
 
 def format_test_message(student_name: str) -> str:
+    app_url = _app_url()
     return (
         f"🛡️ <b>Mentoria Guardian</b>\n\n"
         f"✅ Test successful!\n\n"
@@ -38,11 +52,12 @@ def format_test_message(student_name: str) -> str:
         f"• 📅 Deadline alerts\n"
         f"• 📊 Weekly digests\n"
         f"• 📚 Course reminders\n\n"
-        f"🚀 <a href='{APP_URL}'>Open Mentoria Hub</a>"
+        f"🚀 <a href='{app_url}'>Open Mentoria Hub</a>"
     )
 
 
 def format_deadline_alert(student_name: str, opportunity_title: str, days_left: int) -> str:
+    app_url = _app_url()
     if days_left == 0:
         urgency = "🔴 DUE TODAY"
     elif days_left == 1:
@@ -61,17 +76,18 @@ def format_deadline_alert(student_name: str, opportunity_title: str, days_left: 
         f"✅ Prepare application\n"
         f"✅ Submit before deadline\n\n"
         f"💪 You've got this, {student_name}!\n"
-        f"🚀 <a href='{APP_URL}/opportunities'>Open Opportunities</a>"
+        f"🚀 <a href='{app_url}/opportunities'>Open Opportunities</a>"
     )
 
 
 def get_bot_username() -> Optional[str]:
-    if not is_configured():
+    token = _token()
+    if not token:
         return None
     try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getMe"
+        url = f"https://api.telegram.org/bot{token}/getMe"
         req = urllib.request.Request(url)
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=5, context=_ssl_ctx()) as resp:
             data = json.loads(resp.read())
             return data.get("result", {}).get("username")
     except Exception:
@@ -79,12 +95,13 @@ def get_bot_username() -> Optional[str]:
 
 
 def get_recent_updates(limit: int = 50) -> list:
-    if not is_configured():
+    token = _token()
+    if not token:
         return []
     try:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates?limit={limit}&timeout=0"
+        url = f"https://api.telegram.org/bot{token}/getUpdates?limit={limit}&timeout=0"
         req = urllib.request.Request(url)
-        with urllib.request.urlopen(req, timeout=6) as resp:
+        with urllib.request.urlopen(req, timeout=6, context=_ssl_ctx()) as resp:
             data = json.loads(resp.read())
             return data.get("result", [])
     except Exception:
@@ -92,6 +109,7 @@ def get_recent_updates(limit: int = 50) -> list:
 
 
 def format_weekly_digest(student_name: str, digest: dict) -> str:
+    app_url = _app_url()
     risk = digest.get("risk_status", "safe")
     risk_line = {
         "safe": "🟢 Status: <b>Safe</b> — no urgent deadlines",
@@ -132,5 +150,5 @@ def format_weekly_digest(student_name: str, digest: dict) -> str:
             lines.append(f"  → {a}")
         lines.append("")
 
-    lines.append(f"🚀 <a href='{APP_URL}'>Open Mentoria Hub</a>")
+    lines.append(f"🚀 <a href='{app_url}'>Open Mentoria Hub</a>")
     return "\n".join(lines)
