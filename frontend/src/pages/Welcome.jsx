@@ -97,21 +97,21 @@ export default function Welcome() {
       <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
 
       {/* Контент */}
-      <div className="relative z-10 max-w-5xl w-full">
-        <div className="flex items-end gap-6 md:gap-12">
+      <div className="relative z-10 max-w-7xl w-full">
+        <div className="flex items-center gap-6 md:gap-8 lg:gap-12">
           {/* Маскот - слева */}
-          <div className="hidden md:flex justify-center items-end flex-shrink-0 h-96">
+          <div className="hidden md:flex justify-center items-center flex-shrink-0 w-80 lg:w-96">
             {showMascot && (
               <img
                 src={getMascotImage()}
                 alt="Mentoria Star"
-                className="h-80 drop-shadow-2xl animate-fadeInScale"
+                className="w-full drop-shadow-2xl animate-fadeInScale"
               />
             )}
           </div>
 
           {/* Диалоговое окно - справа */}
-          <div className="flex-1 animate-slideInRight">
+          <div className="flex-1 w-full animate-slideInRight">
             {/* Логотип */}
             <div className="mb-6">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
@@ -121,17 +121,17 @@ export default function Welcome() {
             </div>
 
             {/* Диалоговое окно */}
-            <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-3xl shadow-2xl p-8 md:p-10 border-2 border-white border-opacity-20">
+            <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-7 border-2 border-white border-opacity-20">
               {/* Текст диалога с typewriter эффектом */}
-              <div className="min-h-32 mb-8">
-                <p className="text-xl md:text-2xl text-gray-800 font-medium leading-relaxed">
+              <div className="min-h-24 mb-6">
+                <p className="text-lg md:text-xl text-gray-800 font-medium leading-relaxed">
                   {displayedText}
                   {isTyping && <span className="animate-pulse">|</span>}
                 </p>
               </div>
 
               {/* Прогресс диалога */}
-              <div className="flex justify-between items-center mb-8">
+              <div className="flex justify-between items-center mb-6">
                 <div className="flex gap-2">
                   {dialogs.map((_, idx) => (
                     <div
@@ -142,7 +142,7 @@ export default function Welcome() {
                     ></div>
                   ))}
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-xs md:text-sm text-gray-500">
                   {dialogIndex + 1} / {dialogs.length}
                 </span>
               </div>
@@ -151,25 +151,25 @@ export default function Welcome() {
               {!isFinished ? (
                 <button
                   onClick={handleNext}
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all text-lg"
+                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all text-base md:text-lg"
                 >
                   {isTyping ? 'Показать весь текст' : 'Дальше →'}
                 </button>
               ) : (
-                <div className="space-y-3">
-                  <div className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl text-lg text-center">
+                <div className="space-y-2">
+                  <div className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl text-base md:text-lg text-center">
                     Готов начать?
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2">
                     <Link
                       to="/register"
-                      className="py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-center text-lg"
+                      className="py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-center text-sm md:text-base"
                     >
                       Зарегистрироваться
                     </Link>
                     <Link
                       to="/login"
-                      className="py-4 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-700 transition-all text-center text-lg"
+                      className="py-3 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-700 transition-all text-center text-sm md:text-base"
                     >
                       Войти
                     </Link>
@@ -178,13 +178,13 @@ export default function Welcome() {
               )}
             </div>
 
-            {/* Мобильный маскот - под диалогом */}
-            <div className="md:hidden flex justify-center mt-8">
+            {/* Мобильный маскот - над диалогом */}
+            <div className="md:hidden flex justify-center mb-8">
               {showMascot && (
                 <img
                   src={getMascotImage()}
                   alt="Mentoria Star"
-                  className="h-40 drop-shadow-2xl animate-fadeInScale"
+                  className="w-48 drop-shadow-2xl animate-fadeInScale"
                 />
               )}
             </div>
