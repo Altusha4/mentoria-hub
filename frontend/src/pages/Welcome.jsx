@@ -113,25 +113,25 @@ export default function Welcome() {
           {/* Диалоговое окно - справа */}
           <div className="flex-1 w-full animate-slideInRight">
             {/* Логотип */}
-            <div className="mb-6">
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+            <div className="mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">
                 Mentoria Hub
               </h1>
-              <p className="text-blue-100 text-lg">Your path to success</p>
+              <p className="text-blue-100 text-sm md:text-base">Your path to success</p>
             </div>
 
             {/* Диалоговое окно */}
-            <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-6 md:p-7 border-2 border-white border-opacity-20">
+            <div className="bg-white bg-opacity-95 backdrop-blur-md rounded-2xl shadow-2xl p-5 md:p-6 border-2 border-white border-opacity-20">
               {/* Текст диалога с typewriter эффектом */}
-              <div className="min-h-24 mb-6">
-                <p className="text-lg md:text-xl text-gray-800 font-medium leading-relaxed">
+              <div className="min-h-20 mb-4">
+                <p className="text-base md:text-lg text-gray-800 font-medium leading-relaxed">
                   {displayedText}
                   {isTyping && <span className="animate-pulse">|</span>}
                 </p>
               </div>
 
               {/* Прогресс диалога */}
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-4">
                 <div className="flex gap-2">
                   {dialogs.map((_, idx) => (
                     <div
@@ -151,25 +151,25 @@ export default function Welcome() {
               {!isFinished ? (
                 <button
                   onClick={handleNext}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all text-base md:text-lg"
+                  className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all text-sm md:text-base"
                 >
                   {isTyping ? 'Show all text' : 'Next →'}
                 </button>
               ) : (
-                <div className="space-y-2">
-                  <div className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl text-base md:text-lg text-center">
+                <div className="space-y-1.5">
+                  <div className="w-full py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg text-sm md:text-base text-center">
                     Ready to start?
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-1.5">
                     <Link
                       to="/register"
-                      className="py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-center text-sm md:text-base"
+                      className="py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-all text-center text-xs md:text-sm"
                     >
                       Sign Up
                     </Link>
                     <Link
                       to="/login"
-                      className="py-3 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-700 transition-all text-center text-sm md:text-base"
+                      className="py-2 bg-gray-600 text-white font-bold rounded-lg hover:bg-gray-700 transition-all text-center text-xs md:text-sm"
                     >
                       Log In
                     </Link>
