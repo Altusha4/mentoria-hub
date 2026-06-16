@@ -12,31 +12,31 @@ export default function Welcome() {
   const dialogs = [
     {
       mascot: 'hello',
-      text: 'Привет! Я звезда Mentoria Hub. Добро пожаловать на нашу платформу!'
+      text: 'Hi! I\'m the Mentoria Hub star. Welcome to our platform!'
     },
     {
       mascot: 'idea',
-      text: 'Здесь ты найдешь сотни возможностей: олимпиады, хакатоны, стажировки и стипендии.'
+      text: 'Here you\'ll find hundreds of opportunities: olympiads, hackathons, internships, and scholarships.'
     },
     {
       mascot: 'hello',
-      text: 'Ты сможешь пройти курсы и развить свои навыки в интересующих тебя направлениях.'
+      text: 'You can take courses and develop your skills in the areas that interest you.'
     },
     {
       mascot: 'thinking',
-      text: 'Самое крутое - наша умная система подберет для тебя программы, которые идеально подойдут под твой профиль.'
+      text: 'The coolest part - our smart system will recommend programs that perfectly match your profile.'
     },
     {
       mascot: 'idea',
-      text: 'А еще у нас есть специальный анализ, который покажет тебе точный процент твоих шансов на успех в каждой программе.'
+      text: 'We also have special analytics that show you the exact percentage of your chances of success in each program.'
     },
     {
       mascot: 'clap',
-      text: 'Не бойся! Все получится. Ты уже готов к новым вызовам, тебе просто нужна правильная платформа, чтобы найти свой путь.'
+      text: 'Don\'t be afraid! Everything will work out. You\'re ready for new challenges, you just need the right platform to find your way.'
     },
     {
       mascot: 'hello',
-      text: 'Давай начнем твой путь к успеху прямо сейчас!'
+      text: 'Let\'s start your path to success right now!'
     }
   ];
 
@@ -117,7 +117,7 @@ export default function Welcome() {
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
                 Mentoria Hub
               </h1>
-              <p className="text-blue-100 text-lg">Твой путь к успеху</p>
+              <p className="text-blue-100 text-lg">Your path to success</p>
             </div>
 
             {/* Диалоговое окно */}
@@ -153,25 +153,25 @@ export default function Welcome() {
                   onClick={handleNext}
                   className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all text-base md:text-lg"
                 >
-                  {isTyping ? 'Показать весь текст' : 'Дальше →'}
+                  {isTyping ? 'Show all text' : 'Next →'}
                 </button>
               ) : (
                 <div className="space-y-2">
                   <div className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-xl text-base md:text-lg text-center">
-                    Готов начать?
+                    Ready to start?
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <Link
                       to="/register"
                       className="py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all text-center text-sm md:text-base"
                     >
-                      Зарегистрироваться
+                      Sign Up
                     </Link>
                     <Link
                       to="/login"
                       className="py-3 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-700 transition-all text-center text-sm md:text-base"
                     >
-                      Войти
+                      Log In
                     </Link>
                   </div>
                 </div>
