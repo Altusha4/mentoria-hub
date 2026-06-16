@@ -202,6 +202,8 @@ export default function Guardian({ studentId }) {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [prefs, setPrefs] = useState(null);
+  const [recs, setRecs] = useState([]);
+  const [tracking, setTracking] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const [tgState, setTgState] = useState('idle');
@@ -213,12 +215,14 @@ export default function Guardian({ studentId }) {
 
   const load = useCallback(async () => {
     try {
-      const [mission, p] = await Promise.all([
+      const [mission, p, recommendations] = await Promise.all([
         api.getGuardianMission(studentId),
         api.getNotificationPreferences(studentId),
+        api.getGuardianRecommendations(studentId).catch(() => []),
       ]);
       setData(mission);
       setPrefs(p);
+      setRecs(recommendations);
       if (p.telegram_chat_id) {
         setTgState('connected');
         api.pollBotCommands().catch(() => {});
@@ -241,6 +245,27 @@ export default function Guardian({ studentId }) {
         item.opportunity_id === opportunityId ? { ...item, stage } : item
       ),
     }));
+  };
+
+  const handleTrack = async (opportunityId) => {
+    if (tracking.has(opportunityId)) return;
+    setTracking(prev => new Set([...prev, opportunityId]));
+    try {
+      const watchlistItem = await api.trackOpportunity(studentId, opportunityId);
+      setData(prev => {
+        const alreadyIn = prev.watchlist.some(w => w.opportunity_id === opportunityId);
+        if (alreadyIn) return prev;
+        const newWatchlist = [...prev.watchlist, watchlistItem].sort(
+          (a, b) => (a.days_left ?? 9999) - (b.days_left ?? 9999)
+        );
+        return { ...prev, watchlist: newWatchlist };
+      });
+      setRecs(prev => prev.filter(r => r.id !== opportunityId));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setTracking(prev => { const s = new Set(prev); s.delete(opportunityId); return s; });
+    }
   };
 
   const toggleEmail = async (val) => {
@@ -537,29 +562,70 @@ export default function Guardian({ studentId }) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-black text-slate-900">Opportunity Watchlist</h2>
             <Link to="/opportunities" className="text-sm text-indigo-600 font-semibold hover:underline">
-              Browse more →
+              Browse all →
             </Link>
           </div>
 
           {watchlist.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-14 text-center">
-              <p className="text-5xl mb-4">🎯</p>
-              <p className="font-bold text-slate-700 text-lg mb-2">No opportunities tracked yet</p>
-              <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto leading-relaxed">
-                Save opportunities from the catalog and Guardian will calculate your readiness and track deadlines.
+            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white px-8 py-10 text-center mb-6">
+              <p className="text-5xl mb-3">🎯</p>
+              <p className="font-bold text-slate-700 text-lg mb-1">Nothing tracked yet</p>
+              <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed">
+                Start tracking opportunities to see your readiness score and next best actions.
               </p>
-              <Link
-                to="/opportunities"
-                className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-sm"
-              >
-                Browse Opportunities
-              </Link>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 mb-6">
               {watchlist.map(item => (
                 <ReadinessCard key={item.opportunity_id} item={item} onStageChange={handleStageChange} />
               ))}
+            </div>
+          )}
+
+          {recs.length > 0 && watchlist.length < 4 && (
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-1 h-px bg-slate-200" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                  Recommended to Track
+                </span>
+                <div className="flex-1 h-px bg-slate-200" />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {recs.slice(0, 3).map(r => {
+                  const isTracking = tracking.has(r.id);
+                  const d = r.days_left;
+                  const dLabel = d === null ? 'No deadline' : d === 0 ? 'Due today' : d === 1 ? '1 day left' : `${d} days left`;
+                  const dColor = d !== null && d <= 3 ? 'bg-red-100 text-red-700' : d !== null && d <= 14 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500';
+                  return (
+                    <div key={r.id} className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col gap-3 shadow-sm hover:border-indigo-200 hover:shadow-md transition-all">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          {r.category && (
+                            <span className="text-xs text-slate-400 capitalize">{r.category}</span>
+                          )}
+                          <h4 className="font-bold text-slate-900 text-sm leading-snug mt-0.5 line-clamp-2">{r.title}</h4>
+                        </div>
+                        <span className={`text-xs font-bold px-2 py-1 rounded-full flex-shrink-0 ${dColor}`}>
+                          {dLabel}
+                        </span>
+                      </div>
+                      <p className="text-xs text-indigo-600 font-semibold leading-snug">{r.match_reason}</p>
+                      <button
+                        onClick={() => handleTrack(r.id)}
+                        disabled={isTracking}
+                        className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${
+                          isTracking
+                            ? 'bg-slate-100 text-slate-400 cursor-wait'
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
+                        }`}
+                      >
+                        {isTracking ? 'Adding...' : '+ Track this'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </section>

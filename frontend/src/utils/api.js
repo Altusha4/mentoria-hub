@@ -374,4 +374,18 @@ export const api = {
     });
     return response.json();
   },
+
+  getGuardianRecommendations: async (studentId) => {
+    const response = await fetch(`${API_BASE_URL}/guardian/recommendations/${studentId}`);
+    if (!response.ok) throw new Error('Failed to fetch recommendations');
+    return response.json();
+  },
+
+  trackOpportunity: async (studentId, opportunityId) => {
+    const response = await fetch(`${API_BASE_URL}/guardian/track/${studentId}/${opportunityId}`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to track opportunity');
+    return response.json();
+  },
 };
