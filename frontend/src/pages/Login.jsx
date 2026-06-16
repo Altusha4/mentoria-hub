@@ -49,7 +49,9 @@ export default function Login({ setStudentId }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{
+      background: 'linear-gradient(to bottom right, #2195c4, #20c0a0)'
+    }}>
       <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-8">
         <div className="text-center mb-8">
           <img src="/logo.png" alt="Mentoria Logo" className="w-12 h-12 mx-auto mb-4 object-contain" />
@@ -71,7 +73,10 @@ export default function Login({ setStudentId }) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-transparent"
+              style={{ focus: 'none' }}
+              onFocus={(e) => e.target.style.boxShadow = '0 0 0 3px #3cc5e0'}
+              onBlur={(e) => e.target.style.boxShadow = 'none'}
               placeholder="you@example.com"
             />
           </div>
@@ -83,7 +88,10 @@ export default function Login({ setStudentId }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-transparent"
+              style={{ focus: 'none' }}
+              onFocus={(e) => e.target.style.boxShadow = '0 0 0 3px #3cc5e0'}
+              onBlur={(e) => e.target.style.boxShadow = 'none'}
               placeholder="••••••••"
             />
           </div>
@@ -91,7 +99,8 @@ export default function Login({ setStudentId }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full px-4 py-2 text-white font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            style={{ backgroundColor: '#2195c4' }}
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -100,7 +109,7 @@ export default function Login({ setStudentId }) {
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-gray-600 text-center text-sm">
             Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link to="/register" className="font-semibold hover:opacity-80" style={{ color: '#2195c4' }}>
               Create one here
             </Link>
           </p>

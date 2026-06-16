@@ -75,7 +75,7 @@ export default function Opportunities({ studentId }) {
   const grades = ['8-9', '9-11', '10-11', '8-11'];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+    <div className="min-h-screen transition-colors duration-300" style={{ backgroundColor: 'white' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-12">Education Opportunities</h1>
 
@@ -91,7 +91,16 @@ export default function Opportunities({ studentId }) {
             key={key}
             value={filters[key]}
             onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 bg-white text-gray-900 rounded-lg focus:border-transparent"
+            style={{ focus: 'none' }}
+            onFocus={(e) => {
+              e.target.style.boxShadow = '0 0 0 3px #3cc5e0';
+              e.target.style.borderColor = '#2195c4';
+            }}
+            onBlur={(e) => {
+              e.target.style.boxShadow = 'none';
+              e.target.style.borderColor = '#d1d5db';
+            }}
           >
             <option value="">{label}</option>
             {options.map(option => (

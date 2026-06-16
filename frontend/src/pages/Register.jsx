@@ -151,13 +151,15 @@ export default function Register({ setStudentId }) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 py-12 px-4 flex items-center justify-center">
+    <div className="min-h-screen py-12 px-4 flex items-center justify-center" style={{
+      background: 'linear-gradient(to bottom right, #0a1628, #2195c4, #20c0a0)'
+    }}>
       <div className="w-full max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8 text-white">
           <img src="/logo.png" alt="Mentoria" className="w-16 h-16 mx-auto mb-4 object-contain" />
           <h1 className="text-4xl font-bold mb-2">Join Mentoria Hub</h1>
-          <p className="text-blue-100">Create your account in just 4 steps</p>
+          <p style={{ color: '#b0e0f0' }}>Create your account in just 4 steps</p>
         </div>
 
         {/* Progress Indicator */}
@@ -168,13 +170,14 @@ export default function Register({ setStudentId }) {
                 <div
                   className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all mb-2 ${
                     currentStep >= step.number
-                      ? 'bg-white text-blue-600 shadow-lg'
+                      ? 'bg-white shadow-lg'
                       : 'bg-white bg-opacity-30 text-white'
                   }`}
+                  style={currentStep >= step.number ? { color: '#2195c4' } : {}}
                 >
                   {step.icon}
                 </div>
-                <span className={`text-sm font-semibold ${currentStep >= step.number ? 'text-white' : 'text-blue-200'}`}>
+                <span className="text-sm font-semibold" style={{ color: currentStep >= step.number ? 'white' : '#b0e0f0' }}>
                   {step.label}
                 </span>
               </div>
@@ -212,7 +215,10 @@ export default function Register({ setStudentId }) {
                       type="text"
                       value={formData.first_name}
                       onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                      style={{ focus: 'none' }}
+                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       placeholder="John"
                     />
                   </div>
@@ -222,7 +228,10 @@ export default function Register({ setStudentId }) {
                       type="text"
                       value={formData.last_name}
                       onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                      style={{ focus: 'none' }}
+                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       placeholder="Doe"
                     />
                   </div>
@@ -234,7 +243,10 @@ export default function Register({ setStudentId }) {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                    style={{ focus: 'none' }}
+                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                     placeholder="you@example.com"
                   />
                 </div>
@@ -244,7 +256,10 @@ export default function Register({ setStudentId }) {
                   <select
                     value={formData.grade}
                     onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                    style={{ focus: 'none' }}
+                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                   >
                     {grades.map(grade => (
                       <option key={grade} value={grade}>Grade {grade}</option>
@@ -257,7 +272,10 @@ export default function Register({ setStudentId }) {
                   <textarea
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
+                    style={{ focus: 'none' }}
+                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                     rows="3"
                     placeholder="Tell us about yourself, your background, achievements..."
                   />
@@ -282,9 +300,10 @@ export default function Register({ setStudentId }) {
                         onClick={() => handleInterestToggle(interest)}
                         className={`p-3 border-2 rounded-lg font-semibold transition-all ${
                           formData.interests.includes(interest)
-                            ? 'border-blue-600 bg-blue-50 text-blue-600'
+                            ? 'bg-blue-50 text-gray-700 hover:border-gray-300'
                             : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                         }`}
+                        style={formData.interests.includes(interest) ? { borderColor: '#2195c4', backgroundColor: '#e0f2fe', color: '#2195c4' } : {}}
                       >
                         {interest}
                       </button>
@@ -302,9 +321,10 @@ export default function Register({ setStudentId }) {
                         onClick={() => handleSubjectToggle(subject)}
                         className={`p-3 border-2 rounded-lg font-semibold transition-all ${
                           formData.subjects.includes(subject)
-                            ? 'border-green-600 bg-green-50 text-green-600'
+                            ? 'bg-green-50 text-gray-700 hover:border-gray-300'
                             : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                         }`}
+                        style={formData.subjects.includes(subject) ? { borderColor: '#20c0a0', backgroundColor: '#e0f7f3', color: '#20c0a0' } : {}}
                       >
                         {subject}
                       </button>
@@ -317,7 +337,10 @@ export default function Register({ setStudentId }) {
                   <textarea
                     value={formData.goals}
                     onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
+                    style={{ focus: 'none' }}
+                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                     rows="3"
                     placeholder="E.g., Get into top university, learn programming, win competitions..."
                   />
@@ -332,7 +355,7 @@ export default function Register({ setStudentId }) {
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Background</h2>
                 </div>
 
-                <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                <div className="rounded-lg p-4 mb-6" style={{ backgroundColor: '#e0f2fe' }}>
                   <p className="text-sm text-gray-600">📊 <span className="font-semibold">Optional:</span> Share your academic achievements to get better opportunities</p>
                 </div>
 
@@ -345,7 +368,10 @@ export default function Register({ setStudentId }) {
                         step="0.1"
                         value={formData.gpa}
                         onChange={(e) => setFormData({ ...formData, gpa: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
+                        style={{ focus: 'none' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                         placeholder="3.8"
                       />
                       <span className="px-3 py-3 text-gray-600 font-semibold">/4.0</span>
@@ -360,7 +386,10 @@ export default function Register({ setStudentId }) {
                         step="0.1"
                         value={formData.ielts_score}
                         onChange={(e) => setFormData({ ...formData, ielts_score: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
+                        style={{ focus: 'none' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                         placeholder="7.5"
                       />
                       <span className="px-3 py-3 text-gray-600 font-semibold">/9.0</span>
@@ -374,7 +403,10 @@ export default function Register({ setStudentId }) {
                         type="number"
                         value={formData.toefl_score}
                         onChange={(e) => setFormData({ ...formData, toefl_score: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
+                        style={{ focus: 'none' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                         placeholder="105"
                       />
                       <span className="px-3 py-3 text-gray-600 font-semibold">/120</span>
@@ -388,7 +420,10 @@ export default function Register({ setStudentId }) {
                         type="number"
                         value={formData.sat_score}
                         onChange={(e) => setFormData({ ...formData, sat_score: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
+                        style={{ focus: 'none' }}
+                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                         placeholder="1450"
                       />
                       <span className="px-3 py-3 text-gray-600 font-semibold">/1600</span>
@@ -401,7 +436,10 @@ export default function Register({ setStudentId }) {
                   <textarea
                     value={formData.activities}
                     onChange={(e) => setFormData({ ...formData, activities: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
+                    style={{ focus: 'none' }}
+                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                     rows="2"
                     placeholder="E.g., Football (3 years), Volleyball club, Student council..."
                   />
@@ -412,7 +450,10 @@ export default function Register({ setStudentId }) {
                   <textarea
                     value={formData.certificates}
                     onChange={(e) => setFormData({ ...formData, certificates: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
+                    style={{ focus: 'none' }}
+                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                     rows="2"
                     placeholder="E.g., Math Olympiad (1st), Cambridge English, Science Fair..."
                   />
@@ -423,7 +464,10 @@ export default function Register({ setStudentId }) {
                   <textarea
                     value={formData.skills}
                     onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
+                    style={{ focus: 'none' }}
+                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                     rows="2"
                     placeholder="E.g., Python, Leadership, Data Analysis, Problem Solving (comma-separated)"
                   />
@@ -444,7 +488,10 @@ export default function Register({ setStudentId }) {
                     <textarea
                       value={formData.motivation_letter}
                       onChange={(e) => setFormData({ ...formData, motivation_letter: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
+                      style={{ focus: 'none' }}
+                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       rows="3"
                       placeholder="Share your goals and why you want to join Mentoria..."
                     />
@@ -455,7 +502,10 @@ export default function Register({ setStudentId }) {
                     <textarea
                       value={formData.cv_text}
                       onChange={(e) => setFormData({ ...formData, cv_text: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none transition-colors resize-none font-mono text-sm"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none font-mono text-sm"
+                      style={{ focus: 'none' }}
+                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       rows="3"
                       placeholder="Your CV in text format..."
                     />
@@ -470,13 +520,16 @@ export default function Register({ setStudentId }) {
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
+                      style={{ focus: 'none' }}
+                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
+                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                       placeholder="••••••••"
                     />
                     <p className="text-xs text-gray-500 mt-1">Minimum 6 characters recommended</p>
                   </div>
 
-                  <div className="bg-blue-50 p-4 rounded-lg mt-4">
+                  <div className="p-4 rounded-lg mt-4" style={{ backgroundColor: '#e0f2fe' }}>
                     <MathCaptcha onVerify={setCaptchaVerified} />
                   </div>
                 </div>
@@ -502,7 +555,8 @@ export default function Register({ setStudentId }) {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all"
+                  className="px-8 py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-all"
+                  style={{ backgroundColor: '#2195c4' }}
                 >
                   Next →
                 </button>
@@ -510,7 +564,8 @@ export default function Register({ setStudentId }) {
                 <button
                   type="submit"
                   disabled={loading || !captchaVerified}
-                  className="px-8 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  className="px-8 py-3 text-white font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  style={{ backgroundColor: '#20c0a0' }}
                 >
                   {loading ? 'Creating account...' : '✅ Create Account'}
                 </button>
@@ -523,7 +578,7 @@ export default function Register({ setStudentId }) {
         <div className="text-center text-white">
           <p className="text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="font-bold underline hover:text-blue-100">
+            <Link to="/login" className="font-bold underline hover:opacity-80">
               Sign in here
             </Link>
           </p>
