@@ -49,6 +49,9 @@ export default function Header({ studentId, setStudentId }) {
             <Link to="/courses" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
               Courses
             </Link>
+            <Link to="/guardian" className="text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors flex items-center gap-1">
+              🛡️ Guardian
+            </Link>
             <Link to="/updates" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors flex items-center gap-1">
               Updates
             </Link>
@@ -132,6 +135,13 @@ export default function Header({ studentId, setStudentId }) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Courses
+              </Link>
+              <Link
+                to="/guardian"
+                className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-800 rounded-lg font-medium transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                🛡️ Guardian
               </Link>
               <Link
                 to="/updates"

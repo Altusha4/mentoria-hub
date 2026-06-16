@@ -2,6 +2,7 @@ from sqladmin import ModelView
 from .models import (
     StudentProfile, Opportunity, SavedOpportunity, Course, Lesson, Quiz,
     Enrollment, LessonProgress, NotificationPreference, NotificationLog,
+    OpportunityJourney,
 )
 
 class StudentProfileAdmin(ModelView, model=StudentProfile):
@@ -65,6 +66,19 @@ class NotificationLogAdmin(ModelView, model=NotificationLog):
         NotificationLog.sent_at,
     ]
 
+class OpportunityJourneyAdmin(ModelView, model=OpportunityJourney):
+    name = "Opportunity Journey"
+    name_plural = "Opportunity Journeys"
+    column_list = [
+        OpportunityJourney.id,
+        OpportunityJourney.student_id,
+        OpportunityJourney.opportunity_id,
+        OpportunityJourney.stage,
+        OpportunityJourney.readiness_score,
+        OpportunityJourney.updated_at,
+    ]
+
+
 def register_admin(admin):
     admin.add_view(StudentProfileAdmin)
     admin.add_view(OpportunityAdmin)
@@ -76,3 +90,4 @@ def register_admin(admin):
     admin.add_view(LessonProgressAdmin)
     admin.add_view(NotificationPreferenceAdmin)
     admin.add_view(NotificationLogAdmin)
+    admin.add_view(OpportunityJourneyAdmin)

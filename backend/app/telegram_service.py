@@ -108,6 +108,196 @@ def get_recent_updates(limit: int = 50) -> list:
         return []
 
 
+_last_update_id: int = 0
+
+
+def get_pending_commands(limit: int = 50) -> list:
+    global _last_update_id
+    token = _token()
+    if not token:
+        return []
+    try:
+        offset = _last_update_id + 1 if _last_update_id else ""
+        url = f"https://api.telegram.org/bot{token}/getUpdates?limit={limit}&timeout=0"
+        if offset:
+            url += f"&offset={offset}"
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=6, context=_ssl_ctx()) as resp:
+            data = json.loads(resp.read())
+            updates = data.get("result", [])
+            if updates:
+                _last_update_id = updates[-1]["update_id"]
+            return updates
+    except Exception:
+        return []
+
+
+def format_coach_today(student_name: str, missions: list, guardian_score: float) -> str:
+    app_url = _app_url()
+    lines = [
+        f"🛡️ <b>Today's Mission — {student_name}</b>",
+        f"Guardian Score: <b>{guardian_score:.0f}/100</b>\n",
+        "📋 <b>What to do today:</b>",
+    ]
+    if not missions:
+        lines.append("  No active missions. Keep exploring opportunities!")
+    else:
+        for m in missions:
+            lines.append(f"\n  {m['icon']} <b>{m['title'][:45]}</b>")
+            lines.append(f"  {m['action'][:80]}")
+    lines.append(f"\n🚀 <a href='{app_url}/guardian'>Open Guardian</a>")
+    return "\n".join(lines)
+
+
+def format_coach_deadlines(student_name: str, watchlist: list) -> str:
+    app_url = _app_url()
+    upcoming = [w for w in watchlist if w.get("days_left") is not None and w["days_left"] >= 0]
+    upcoming.sort(key=lambda x: x["days_left"])
+    lines = [f"📅 <b>Upcoming Deadlines — {student_name}</b>\n"]
+    if not upcoming:
+        lines.append("No upcoming deadlines in your watchlist.")
+        lines.append("Save opportunities in Mentoria Hub to track them here.")
+    else:
+        for w in upcoming[:6]:
+            d = w["days_left"]
+            icon = "🔴" if d <= 1 else "🟡" if d <= 7 else "🔵"
+            label = "Due TODAY" if d == 0 else "Due tomorrow" if d == 1 else f"{d} days left"
+            lines.append(f"{icon} <b>{w['title'][:45]}</b>")
+            lines.append(f"   {label} · {w['readiness_score']:.0f}% ready")
+            if w.get("next_action"):
+                lines.append(f"   ⚡ {w['next_action'][:60]}")
+    lines.append(f"\n🚀 <a href='{app_url}/guardian'>View in Guardian</a>")
+    return "\n".join(lines)
+
+
+def format_coach_watchlist(student_name: str, watchlist: list) -> str:
+    app_url = _app_url()
+    stage_icon = {"discovered": "💡", "exploring": "🔍", "preparing": "📝", "ready": "✅", "applied": "🚀"}
+    lines = [f"🎯 <b>Your Watchlist — {student_name}</b>\n"]
+    if not watchlist:
+        lines.append("No tracked opportunities yet.")
+        lines.append("Visit Mentoria Hub to save opportunities and track your progress.")
+    else:
+        for w in watchlist[:6]:
+            ico = stage_icon.get(w.get("stage", "discovered"), "💡")
+            d = w.get("days_left")
+            dl = f" · {d}d left" if d is not None and d >= 0 else (" · Expired" if d is not None else "")
+            lines.append(f"{ico} <b>{w['title'][:45]}</b>")
+            lines.append(f"   {w['readiness_score']:.0f}% ready{dl}")
+            if w.get("next_action"):
+                lines.append(f"   ⚡ {w['next_action'][:60]}")
+    lines.append(f"\n🚀 <a href='{app_url}/guardian'>Guardian Dashboard</a>")
+    return "\n".join(lines)
+
+
+def format_coach_score(student_name: str, guardian_score: float, risk_status: str) -> str:
+    app_url = _app_url()
+    risk_line = {
+        "safe": "🟢 All clear — no urgent deadlines",
+        "attention": "🟡 Heads up — deadlines this week",
+        "risk": "🔴 Urgent — deadline today or tomorrow",
+    }.get(risk_status, "⚪ Status unknown")
+    if guardian_score >= 80:
+        tier, tier_icon = "Fully Protected", "🏆"
+    elif guardian_score >= 60:
+        tier, tier_icon = "On Track", "✅"
+    elif guardian_score >= 40:
+        tier, tier_icon = "Needs Attention", "⚡"
+    else:
+        tier, tier_icon = "At Risk", "⚠️"
+    lines = [
+        f"🛡️ <b>Guardian Score — {student_name}</b>\n",
+        f"{tier_icon} <b>{guardian_score:.0f} / 100</b> — {tier}",
+        "",
+        risk_line,
+        "",
+        f"Send /today for today's missions.",
+        f"Send /deadlines to check your timeline.",
+        f"\n🚀 <a href='{app_url}/guardian'>Full Report</a>",
+    ]
+    return "\n".join(lines)
+
+
+def format_coach_courses(student_name: str, course_progress: list, incomplete: int) -> str:
+    app_url = _app_url()
+    lines = [f"📚 <b>Courses — {student_name}</b>\n"]
+    if not course_progress:
+        lines.append("No enrolled courses yet.")
+        lines.append(f"Browse courses at {app_url}/courses")
+    else:
+        for c in course_progress:
+            pct = c.get("progress", 0)
+            done = pct >= 100
+            icon = "🏆" if done else "🔥" if pct > 50 else "📖" if pct > 0 else "🚀"
+            filled = int(pct / 10)
+            bar = "█" * filled + "░" * (10 - filled)
+            status = "Complete! 🎉" if done else f"{pct:.0f}%"
+            lines.append(f"{icon} <b>{c['title'][:40]}</b>")
+            lines.append(f"   [{bar}] {status}")
+        if incomplete > 0:
+            lines.append(f"\n⏳ {incomplete} lesson{'s' if incomplete > 1 else ''} remaining across all courses")
+    lines.append(f"\n🚀 <a href='{app_url}/courses'>Go to Courses</a>")
+    return "\n".join(lines)
+
+
+def format_coach_guardian(student_name: str, data: dict) -> str:
+    app_url = _app_url()
+    score = data.get("guardian_score", 0)
+    risk = data.get("risk_status", "safe")
+    watchlist = data.get("watchlist", [])
+    courses = data.get("course_progress", [])
+    missions = data.get("missions", [])
+    risk_line = {
+        "safe": "🟢 Status: Safe",
+        "attention": "🟡 Status: Needs Attention",
+        "risk": "🔴 Status: Deadline Risk",
+    }.get(risk, "⚪")
+    lines = [
+        f"🛡️ <b>Mentoria Guardian</b>",
+        f"<b>{student_name}</b> · Score: {score:.0f}/100",
+        "",
+        risk_line,
+        "",
+    ]
+    if missions:
+        lines.append("📋 <b>Today's missions:</b>")
+        for m in missions[:2]:
+            lines.append(f"  {m['icon']} {m['action'][:60]}")
+        lines.append("")
+    urgent = [w for w in watchlist if w.get("days_left") is not None and 0 <= w["days_left"] <= 7]
+    if urgent:
+        lines.append("⚠️ <b>Urgent deadlines:</b>")
+        for w in urgent[:3]:
+            d = w["days_left"]
+            label = "TODAY" if d == 0 else f"{d}d"
+            lines.append(f"  • {w['title'][:38]} ({label})")
+        lines.append("")
+    if courses:
+        active = [c for c in courses if 0 < c.get("progress", 0) < 100]
+        if active:
+            c = active[0]
+            lines.append(f"📖 Continue: <b>{c['title'][:35]}</b> — {c['progress']:.0f}%")
+            lines.append("")
+    lines.append(f"🚀 <a href='{app_url}/guardian'>Open Guardian</a>")
+    lines.append("\n<i>/today /deadlines /watchlist /score /courses /help</i>")
+    return "\n".join(lines)
+
+
+def format_coach_help() -> str:
+    return (
+        "🛡️ <b>Mentoria Guardian Bot</b>\n\n"
+        "I'm your personal education coach. Here's what I can do:\n\n"
+        "  /today — Today's priority missions\n"
+        "  /deadlines — Upcoming application deadlines\n"
+        "  /watchlist — Tracked opportunities + readiness\n"
+        "  /score — Your Guardian Score\n"
+        "  /courses — Course progress\n"
+        "  /guardian — Full summary\n"
+        "  /help — Show this message\n\n"
+        "Powered by Mentoria Hub 🚀"
+    )
+
+
 def format_weekly_digest(student_name: str, digest: dict) -> str:
     app_url = _app_url()
     risk = digest.get("risk_status", "safe")

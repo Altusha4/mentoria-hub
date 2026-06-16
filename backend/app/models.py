@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Table, Float, Date
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, ForeignKey, Table, Float, Date, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
@@ -48,6 +48,7 @@ class StudentProfile(Base):
     saved_opportunities = relationship("SavedOpportunity", back_populates="student")
     notification_preference = relationship("NotificationPreference", back_populates="student", uselist=False)
     notification_logs = relationship("NotificationLog", back_populates="student")
+    opportunity_journeys = relationship("OpportunityJourney", back_populates="student")
 
 class Opportunity(Base):
     __tablename__ = "opportunity"
@@ -66,6 +67,7 @@ class Opportunity(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     saved_by = relationship("SavedOpportunity", back_populates="opportunity", cascade="all, delete-orphan")
+    journeys = relationship("OpportunityJourney", back_populates="opportunity", cascade="all, delete-orphan")
 
 class SavedOpportunity(Base):
     __tablename__ = "saved_opportunity"
@@ -187,3 +189,19 @@ class TelegramPost(Base):
     image_url = Column(String, nullable=True)
     posted_at = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class OpportunityJourney(Base):
+    __tablename__ = "opportunity_journey"
+    __table_args__ = (UniqueConstraint("student_id", "opportunity_id", name="uq_journey_student_opp"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("student_profile.id"))
+    opportunity_id = Column(Integer, ForeignKey("opportunity.id"))
+    stage = Column(String, default="discovered")
+    readiness_score = Column(Float, default=0.0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    student = relationship("StudentProfile", back_populates="opportunity_journeys")
+    opportunity = relationship("Opportunity", back_populates="journeys")
