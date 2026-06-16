@@ -162,7 +162,7 @@ function ReadinessCard({ item, onStageChange }) {
 
       <div className="border-t border-slate-100 bg-slate-50 px-5 py-3">
         <p className="text-xs font-semibold text-slate-400 mb-2">Application stage</p>
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 mb-3">
           {STAGES.map((s) => {
             const active = s.key === item.stage;
             return (
@@ -182,7 +182,7 @@ function ReadinessCard({ item, onStageChange }) {
           })}
         </div>
         {item.suggested_stage !== item.stage && item.suggested_stage !== 'discovered' && (
-          <p className="text-xs text-slate-400 mt-1.5">
+          <p className="text-xs text-slate-400 mb-3">
             Suggested:{' '}
             <button
               onClick={() => handleStage(item.suggested_stage)}
@@ -192,6 +192,20 @@ function ReadinessCard({ item, onStageChange }) {
             </button>
             {' '}based on your readiness
           </p>
+        )}
+        {item.effective_url ? (
+          <a
+            href={item.effective_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-bold transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+          >
+            {item.apply_url ? 'Apply Now →' : 'Open Source →'}
+          </a>
+        ) : (
+          <div className="w-full py-2 rounded-xl text-xs font-semibold text-center text-slate-400 bg-slate-100">
+            Application link coming soon
+          </div>
         )}
       </div>
     </div>
@@ -611,17 +625,30 @@ export default function Guardian({ studentId }) {
                         </span>
                       </div>
                       <p className="text-xs text-indigo-600 font-semibold leading-snug">{r.match_reason}</p>
-                      <button
-                        onClick={() => handleTrack(r.id)}
-                        disabled={isTracking}
-                        className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${
-                          isTracking
-                            ? 'bg-slate-100 text-slate-400 cursor-wait'
-                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
-                        }`}
-                      >
-                        {isTracking ? 'Adding...' : '+ Track this'}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleTrack(r.id)}
+                          disabled={isTracking}
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                            isTracking
+                              ? 'bg-slate-100 text-slate-400 cursor-wait'
+                              : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
+                          }`}
+                        >
+                          {isTracking ? 'Adding...' : '+ Track'}
+                        </button>
+                        {r.source_url && (
+                          <a
+                            href={r.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-shrink-0 py-2.5 px-3 rounded-xl text-sm font-bold border border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                            title="Open source"
+                          >
+                            ↗
+                          </a>
+                        )}
+                      </div>
                     </div>
                   );
                 })}

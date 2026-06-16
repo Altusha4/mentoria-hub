@@ -162,7 +162,9 @@ def format_coach_deadlines(student_name: str, watchlist: list) -> str:
             d = w["days_left"]
             icon = "🔴" if d <= 1 else "🟡" if d <= 7 else "🔵"
             label = "Due TODAY" if d == 0 else "Due tomorrow" if d == 1 else f"{d} days left"
-            lines.append(f"{icon} <b>{w['title'][:45]}</b>")
+            effective = w.get("effective_url") or w.get("apply_url") or w.get("source_url")
+            title_str = f"<a href='{effective}'>{w['title'][:45]}</a>" if effective else f"<b>{w['title'][:45]}</b>"
+            lines.append(f"{icon} {title_str}")
             lines.append(f"   {label} · {w['readiness_score']:.0f}% ready")
             if w.get("next_action"):
                 lines.append(f"   ⚡ {w['next_action'][:60]}")
@@ -182,7 +184,9 @@ def format_coach_watchlist(student_name: str, watchlist: list) -> str:
             ico = stage_icon.get(w.get("stage", "discovered"), "💡")
             d = w.get("days_left")
             dl = f" · {d}d left" if d is not None and d >= 0 else (" · Expired" if d is not None else "")
-            lines.append(f"{ico} <b>{w['title'][:45]}</b>")
+            effective = w.get("effective_url") or w.get("apply_url") or w.get("source_url")
+            title_str = f"<a href='{effective}'>{w['title'][:45]}</a>" if effective else f"<b>{w['title'][:45]}</b>"
+            lines.append(f"{ico} {title_str}")
             lines.append(f"   {w['readiness_score']:.0f}% ready{dl}")
             if w.get("next_action"):
                 lines.append(f"   ⚡ {w['next_action'][:60]}")

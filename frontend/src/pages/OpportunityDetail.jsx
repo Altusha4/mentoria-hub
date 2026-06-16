@@ -239,14 +239,24 @@ export default function OpportunityDetail({ studentId }) {
 
             {/* CTA Buttons */}
             <div className="space-y-3">
-              <a
-                href={opportunity.apply_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg"
-              >
-                Apply Now →
-              </a>
+              {(() => {
+                const effectiveUrl = opportunity.apply_url || opportunity.source_url;
+                const label = opportunity.apply_url ? 'Apply Now →' : opportunity.source_url ? 'Open Source →' : null;
+                return effectiveUrl ? (
+                  <a
+                    href={effectiveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    {label}
+                  </a>
+                ) : (
+                  <div className="block w-full text-center bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 font-bold py-4 rounded-lg cursor-default select-none">
+                    Application link not available yet
+                  </div>
+                );
+              })()}
 
               <button
                 onClick={handleCheckChance}

@@ -7,10 +7,12 @@ from .models import (
 from .auth import hash_password
 import random
 
+MENTORIA_COMMUNITY = "https://t.me/+g3LCWJIvCcw5YjEy"
+
+
 def seed_data():
     db = SessionLocal()
 
-    # Helper to get random avatar
     AVATAR_EMOJIS = ['👤', '😊', '🎓', '🚀', '⭐', '💼', '🎯', '🌟', '💡', '🏆', '🎨', '🧠']
 
     # Create sample students
@@ -54,6 +56,7 @@ def seed_data():
             requirements="Strong background in Physics and Mathematics, English language proficiency",
             grade_level="10-11",
             tags="STEM,Science,Olympiad,Online",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Summer Business Camp",
@@ -65,6 +68,7 @@ def seed_data():
             requirements="Interest in business, basic English",
             grade_level="9-11",
             tags="Business,Leadership,Summer",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="AI & Machine Learning Hackathon",
@@ -76,6 +80,7 @@ def seed_data():
             requirements="Python programming knowledge, teamwork skills",
             grade_level="10-11",
             tags="Programming,AI,Hackathon,Technology",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="STEM Regional Olympiad",
@@ -87,6 +92,7 @@ def seed_data():
             requirements="Strong math and science background, grade 9-11",
             grade_level="9-11",
             tags="STEM,Olympiad,Math,Science,Urgent",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Young Entrepreneurs Competition",
@@ -98,6 +104,7 @@ def seed_data():
             requirements="Business plan, entrepreneurial mindset",
             grade_level="8-11",
             tags="Business,Entrepreneurship,Competition",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Financial Literacy Scholarship",
@@ -109,6 +116,7 @@ def seed_data():
             requirements="Keen interest in finance, mathematics proficiency",
             grade_level="8-11",
             tags="Finance,Scholarship,Learning",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Social Innovation Challenge",
@@ -120,6 +128,7 @@ def seed_data():
             requirements="Creativity, team collaboration",
             grade_level="8-11",
             tags="Social,Innovation,Competition",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="STEM Research Program",
@@ -131,6 +140,7 @@ def seed_data():
             requirements="Strong interest in research, science background",
             grade_level="10-11",
             tags="STEM,Research,Education",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Global Leadership Summit",
@@ -142,6 +152,7 @@ def seed_data():
             requirements="Leadership potential, English language",
             grade_level="9-11",
             tags="Leadership,Networking,Global",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Coding Excellence Program",
@@ -153,6 +164,7 @@ def seed_data():
             requirements="Basic programming knowledge",
             grade_level="8-11",
             tags="Programming,Coding,Online",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Environmental Science Competition",
@@ -164,6 +176,7 @@ def seed_data():
             requirements="Science knowledge, research skills",
             grade_level="9-11",
             tags="STEM,Environment,Science",
+            source_url=MENTORIA_COMMUNITY,
         ),
         Opportunity(
             title="Entrepreneurship Incubator",
@@ -175,6 +188,7 @@ def seed_data():
             requirements="Entrepreneurial mindset",
             grade_level="9-11",
             tags="Business,Entrepreneurship,Mentoring",
+            source_url=MENTORIA_COMMUNITY,
         ),
     ]
     for opportunity in opportunities:

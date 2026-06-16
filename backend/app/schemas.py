@@ -11,6 +11,7 @@ class OpportunityBase(BaseModel):
     description: str
     requirements: str
     apply_url: Optional[str] = None
+    source_url: Optional[str] = None
     grade_level: str
     tags: Optional[str] = None
 
