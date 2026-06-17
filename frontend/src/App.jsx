@@ -15,14 +15,18 @@ import Search from './pages/Search';
 import Updates from './pages/Updates';
 import OpportunityDetail from './pages/OpportunityDetail';
 import Guardian from './pages/Guardian';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import './index.css';
 
 function AppContent({ studentId, setStudentId, handleLogout }) {
   const location = useLocation();
+  const { theme } = useTheme();
   const showFooter = studentId && location.pathname !== '/profile';
 
   return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900">
+    <div className={`flex flex-col min-h-screen transition-colors duration-300 ${
+      theme === 'dark' ? 'bg-[#060d18] text-white' : 'bg-white text-gray-900'
+    }`}>
       {studentId && <Header studentId={studentId} setStudentId={() => handleLogout()} />}
 
       <main className="flex-1">
@@ -99,9 +103,6 @@ export default function App() {
       setStudentId(parseInt(savedStudentId));
     }
 
-    // Clear old localStorage theme key
-    localStorage.removeItem('theme');
-
     setLoading(false);
   }, []);
 
@@ -117,8 +118,10 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter>
-      <AppContent studentId={studentId} setStudentId={setStudentId} handleLogout={handleLogout} />
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AppContent studentId={studentId} setStudentId={setStudentId} handleLogout={handleLogout} />
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

@@ -1,12 +1,214 @@
+/* ═══════════════════════════════════════════════
+   Mentoria Hub — Global Design System
+   ═══════════════════════════════════════════════ */
+
+/* Color palette as CSS custom properties */
+:root {
+  --mentoria-navy: #0a1628;
+  --mentoria-deep: #001a35;
+  --mentoria-dark: #0f1f2e;
+  --mentoria-cyan: #3cc5e0;
+  --mentoria-teal: #20c0a0;
+  --mentoria-blue: #2195c4;
+  --mentoria-gold: #ffd700;
+  --mentoria-glow-cyan: rgba(60, 197, 224, 0.4);
+  --mentoria-glow-teal: rgba(32, 192, 160, 0.3);
+}
+
+/* Base reset & font */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+/* ═══ Smooth theme transition ═══ */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ═══ Animations ═══ */
+
+/* Float — gentle hovering effect */
+@keyframes mentoria-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Glow pulse — subtle glow breathing */
+@keyframes mentoria-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px var(--mentoria-glow-cyan))
+            drop-shadow(0 0 40px var(--mentoria-glow-teal));
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 35px var(--mentoria-glow-cyan))
+            drop-shadow(0 0 60px var(--mentoria-glow-teal));
+    opacity: 0.95;
+  }
+}
+
+/* Fade in up — entrance animation */
+@keyframes mentoria-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in scale — entrance with scale */
+@keyframes mentoria-fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shimmer — card hover shine */
+@keyframes mentoria-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Count up pulse */
+@keyframes mentoria-countPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+/* Gradient flow */
+@keyframes mentoria-gradientFlow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Orb float — background decorative */
+@keyframes mentoria-orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+  50% {
+    transform: translate(-20px, 15px) scale(0.95);
+  }
+  75% {
+    transform: translate(15px, 25px) scale(1.03);
+  }
+}
+
+/* ═══ Utility classes ═══ */
+
+.mentoria-float {
+  animation: mentoria-float 4s ease-in-out infinite;
+}
+
+.mentoria-glow {
+  animation: mentoria-glow 3s ease-in-out infinite;
+}
+
+.mentoria-fadeInUp {
+  animation: mentoria-fadeInUp 0.7s ease-out forwards;
+}
+
+.mentoria-fadeInScale {
+  animation: mentoria-fadeInScale 0.6s ease-out forwards;
+}
+
+.mentoria-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: mentoria-shimmer 3s ease-in-out infinite;
+}
+
+.mentoria-gradientFlow {
+  background-size: 200% 200%;
+  animation: mentoria-gradientFlow 6s ease infinite;
+}
+
+.mentoria-orbFloat {
+  animation: mentoria-orbFloat 15s ease-in-out infinite;
+}
+
+/* Stagger delays for entrance animations */
+.mentoria-delay-1 { animation-delay: 0.1s; opacity: 0; }
+.mentoria-delay-2 { animation-delay: 0.2s; opacity: 0; }
+.mentoria-delay-3 { animation-delay: 0.3s; opacity: 0; }
+.mentoria-delay-4 { animation-delay: 0.4s; opacity: 0; }
+.mentoria-delay-5 { animation-delay: 0.5s; opacity: 0; }
+
+/* ═══ Glassmorphism card base ═══ */
+.mentoria-glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+}
+
+.mentoria-glass-light {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+}
+
+/* ═══ Scrollbar styling ═══ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(60, 197, 224, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(60, 197, 224, 0.5);
 }
