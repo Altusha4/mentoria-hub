@@ -192,14 +192,19 @@ export default function Updates() {
 
   const fetchData = async () => {
     try {
+      console.log('📡 [Updates] Fetching telegram data...');
       const [postsData, categoriesData] = await Promise.all([
-        api.getTelegramPosts(126),
+        api.getTelegramPosts(50),  // ← Исправлено: 50 вместо 126
         api.getTelegramCategories(),
       ]);
-      setPosts(postsData);
-      setCategories(categoriesData.categories || []);
+      console.log('✅ [Updates] Posts received:', postsData?.length);
+      console.log('✅ [Updates] Categories received:', categoriesData?.categories?.length);
+      setPosts(postsData || []);
+      setCategories(categoriesData?.categories || []);
     } catch (error) {
-      console.error('Error fetching Telegram data:', error);
+      console.error('❌ [Updates] Error fetching data:', error);
+      setPosts([]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -207,10 +212,13 @@ export default function Updates() {
 
   const fetchPostsByCategory = async (category) => {
     try {
-      const data = await api.getTelegramPosts(126, category === 'all' ? null : category);
-      setPosts(data);
+      console.log('📡 [Updates] Fetching posts for category:', category);
+      const data = await api.getTelegramPosts(50, category === 'all' ? null : category);  // ← Исправлено: 50 вместо 126
+      console.log('✅ [Updates] Posts for category:', data?.length);
+      setPosts(data || []);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error('❌ [Updates] Error fetching posts:', error);
+      setPosts([]);
     }
   };
 
