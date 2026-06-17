@@ -79,8 +79,77 @@ def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
 
     return {"ok": True}
 
+@router.post("/sync")
+def sync_telegram_posts(db: Session = Depends(get_db)):
+    """Синхронизировать посты с реального Telegram канала @mentoria_updates"""
+    from .. import telegram_service
+    from datetime import datetime
+
+    print("🔄 [TELEGRAM] Синхронизирую посты с каналом...")
+
+    # Получаем последние посты с канала
+    posts = telegram_service.get_recent_posts("-1004422220327", limit=10)
+
+    if not posts:
+        return {"message": "No new posts found", "count": 0}
+
+    # Определяем категорию по ключевым словам
+    def detect_category(text):
+        text_lower = text.lower()
+        if any(word in text_lower for word in ["hiring", "job", "career", "vacancy", "recruiting"]):
+            return "hiring"
+        elif any(word in text_lower for word in ["course", "program", "training", "bootcamp", "learn"]):
+            return "programs"
+        elif any(word in text_lower for word in ["hackathon", "competition", "olympiad", "internship", "opportunity"]):
+            return "opportunities"
+        elif any(word in text_lower for word in ["announce", "news", "launch", "update"]):
+            return "news"
+        elif any(word in text_lower for word in ["tip", "advice", "guide", "how to"]):
+            return "tips"
+        return "general"
+
+    count = 0
+    for post_data in posts:
+        # Проверяем что поста еще нет в БД
+        existing = db.query(TelegramPost).filter(
+            TelegramPost.telegram_message_id == post_data["message_id"]
+        ).first()
+
+        if existing:
+            print(f"⏭️  Post #{post_data['message_id']} already exists")
+            continue
+
+        # Парсим заголовок и контент
+        text = post_data.get("text", "")
+        lines = text.split("\n", 1)
+        title = lines[0][:100] if lines else "Update"
+        content = "\n".join(lines[1:]) if len(lines) > 1 else text
+
+        # Сохраняем в БД
+        db_post = TelegramPost(
+            telegram_message_id=post_data["message_id"],
+            title=title,
+            content=content,
+            category=detect_category(text),
+            posted_at=datetime.fromtimestamp(post_data.get("date", 0))
+        )
+
+        db.add(db_post)
+        count += 1
+        print(f"✅ [TELEGRAM] Сохранен пост: {title[:50]}...")
+
+    db.commit()
+    print(f"✨ [TELEGRAM] Синхронизировано {count} новых постов")
+
+    return {
+        "message": f"Synced {count} new posts",
+        "count": count,
+        "total_posts": db.query(TelegramPost).count()
+    }
+
+
 @router.get("/posts", response_model=List[TelegramPostSchema])
-def get_telegram_posts(limit: int = 100, category: str = None, db: Session = Depends(get_db)):
+def get_telegram_posts(limit: int = 50, category: str = None, db: Session = Depends(get_db)):
     """Получить последние посты из Telegram канала (опционально с фильтром по категориям)"""
     query = db.query(TelegramPost)
 
