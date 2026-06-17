@@ -178,6 +178,7 @@ export default function Updates() {
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPost, setSelectedPost] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -232,6 +233,42 @@ export default function Updates() {
     setSelectedPost(null);
   };
 
+  const handleDeletePost = async (postId, postTitle) => {
+    if (!window.confirm(`Delete "${postTitle}"?`)) return;
+
+    try {
+      console.log('🗑️ [Updates] Deleting post:', postId);
+      await api.deleteTelegramPost(postId);
+      console.log('✅ [Updates] Post deleted');
+
+      // Удаляем пост из состояния
+      setPosts(posts.filter(p => p.id !== postId));
+      alert('✅ Пост удален');
+    } catch (error) {
+      console.error('❌ [Updates] Delete error:', error);
+      alert('❌ Ошибка удаления поста');
+    }
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      console.log('🔄 [Updates] Syncing deleted posts...');
+      const result = await api.syncTelegramDeletions();
+      console.log('✅ [Updates] Sync result:', result);
+
+      // Перезагружаем посты после синхронизации
+      await fetchData();
+
+      alert('ℹ️ Используй кнопку 🗑️ на каждом посте для удаления');
+    } catch (error) {
+      console.error('❌ [Updates] Sync error:', error);
+      alert('❌ Ошибка синхронизации');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
@@ -248,7 +285,7 @@ export default function Updates() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-10">
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3">
             <span className="text-5xl">📢</span>
             <div>
               <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white">Latest Updates</h1>

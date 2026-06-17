@@ -263,6 +263,20 @@ export const api = {
     return response.json();
   },
 
+  syncTelegramDeletions: async () => {
+    const response = await fetch(`${API_BASE_URL}/telegram/sync-deletions`, {
+      method: 'POST',
+    });
+    return response.json();
+  },
+
+  deleteTelegramPost: async (postId) => {
+    const response = await fetch(`${API_BASE_URL}/telegram/posts/${postId}`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  },
+
   updateTelegramPostCategory: async (postId, category) => {
     const response = await fetch(`${API_BASE_URL}/telegram/posts/${postId}/category`, {
       method: "PATCH",

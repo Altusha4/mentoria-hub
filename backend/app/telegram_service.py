@@ -5,6 +5,7 @@ import urllib.request
 import urllib.parse
 from typing import Optional, List
 import certifi
+from datetime import datetime
 
 
 def _ssl_ctx() -> ssl.SSLContext:
@@ -143,3 +144,43 @@ def format_new_post_notification(title: str, content: str) -> str:
         f"{content[:200]}...\n\n"
         f"🔗 <a href='{app_url}/updates'>View all updates</a>"
     )
+
+
+def format_weekly_digest(opportunities: List[dict]) -> str:
+    """Еженедельная рассылка возможностей"""
+    app_url = _app_url()
+    if not opportunities:
+        return (
+            f"📚 <b>Weekly Mentoria Digest</b>\n\n"
+            f"No new opportunities this week.\n\n"
+            f"🚀 <a href='{app_url}/opportunities'>Check all opportunities</a>"
+        )
+
+    opp_text = "\n".join([
+        f"• <b>{opp.get('title', 'Untitled')[:50]}</b> - {opp.get('category', 'General')}"
+        for opp in opportunities[:5]
+    ])
+
+    return (
+        f"📚 <b>Weekly Mentoria Digest</b>\n\n"
+        f"Top opportunities this week:\n\n"
+        f"{opp_text}\n\n"
+        f"🚀 <a href='{app_url}/opportunities'>View all</a>"
+    )
+
+
+def get_bot_username() -> Optional[str]:
+    """Получить имя пользователя бота"""
+    token = _token()
+    if not token:
+        return None
+
+    result = _telegram_api_call("getMe", {})
+    if result.get("ok"):
+        return result.get("result", {}).get("username")
+    return None
+
+
+def get_recent_updates(limit: int = 5) -> List[dict]:
+    """Получить последние обновления из канала"""
+    return get_recent_posts("-1004422220327", limit)

@@ -13,67 +13,34 @@ class TelegramWebhook(BaseModel):
     update_id: int
     message: dict
 
-@router.post("/webhook")
-def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
-    """Получает сообщения из Telegram бота через webhook"""
-    from .. import telegram_service
-    from ..models import NotificationPreference
+def _detect_category(text):
+    """Определить категорию поста по ключевым словам"""
+    text_lower = text.lower()
+    if any(word in text_lower for word in ["hiring", "job", "career", "vacancy"]):
+        return "hiring"
+    elif any(word in text_lower for word in ["course", "program", "training", "bootcamp"]):
+        return "programs"
+    elif any(word in text_lower for word in ["hackathon", "competition", "olympiad", "internship"]):
+        return "opportunities"
+    elif any(word in text_lower for word in ["announce", "news", "launch", "update"]):
+        return "news"
+    elif any(word in text_lower for word in ["tip", "advice", "guide"]):
+        return "tips"
+    return "general"
 
-    print(f"📬 [WEBHOOK] Получено обновление из Telegram")
 
-    # Проверяем что это channel_post
-    if "channel_post" not in data:
-        return {"ok": True}
-
-    message = data.get("channel_post", {})
+def _save_or_update_post(message: dict, db: Session, is_edit: bool = False):
+    """Сохранить новый пост или обновить существующий"""
     message_id = message.get("message_id")
-    chat_id = message.get("chat", {}).get("id")
-
-    print(f"📮 [WEBHOOK] Channel post #{message_id} from chat {chat_id}")
-
-    # Проверяем что это из нашего канала
-    if chat_id != -1004422220327:  # @mentoria_updates
-        return {"ok": True}
-
-    if not message_id:
-        return {"ok": True}
-
-    # Проверяем что пост уже не сохранён
-    existing = db.query(TelegramPost).filter(
-        TelegramPost.telegram_message_id == message_id
-    ).first()
-
-    if existing:
-        print(f"⏭️  Post #{message_id} already exists")
-        return {"ok": True}
-
-    # Извлекаем текст
     text = message.get("text") or message.get("caption") or ""
 
     if not text:
-        return {"ok": True}
+        return None
 
-    # Парсим текст: первая строка = title, остальное = content
     lines = text.split("\n", 1)
     title = lines[0][:100]
     content = "\n".join(lines[1:]) if len(lines) > 1 else text
 
-    # Определяем категорию
-    def detect_category(text):
-        text_lower = text.lower()
-        if any(word in text_lower for word in ["hiring", "job", "career", "vacancy"]):
-            return "hiring"
-        elif any(word in text_lower for word in ["course", "program", "training", "bootcamp"]):
-            return "programs"
-        elif any(word in text_lower for word in ["hackathon", "competition", "olympiad", "internship"]):
-            return "opportunities"
-        elif any(word in text_lower for word in ["announce", "news", "launch", "update"]):
-            return "news"
-        elif any(word in text_lower for word in ["tip", "advice", "guide"]):
-            return "tips"
-        return "general"
-
-    # Извлекаем фото если есть
     image_url = None
     if "photo" in message:
         photos = message.get("photo", [])
@@ -81,27 +48,46 @@ def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
             largest_photo = max(photos, key=lambda p: p.get("file_size", 0))
             image_url = f"https://api.telegram.org/file/bot{largest_photo.get('file_id')}"
 
-    # Получаем время сообщения
     posted_at = datetime.fromtimestamp(message.get("date", 0))
 
-    # Сохраняем в БД
+    existing = db.query(TelegramPost).filter(
+        TelegramPost.telegram_message_id == message_id
+    ).first()
+
+    if existing:
+        if is_edit:
+            print(f"✏️  [WEBHOOK] Обновляю пост #{message_id}: {title}")
+            existing.title = title
+            existing.content = content
+            existing.category = _detect_category(text)
+            existing.image_url = image_url
+            existing.posted_at = posted_at
+            db.commit()
+            db.refresh(existing)
+            return existing
+        else:
+            print(f"⏭️  Post #{message_id} уже существует")
+            return existing
+
+    # Новый пост
     db_post = TelegramPost(
         telegram_message_id=message_id,
         title=title,
         content=content,
-        category=detect_category(text),
+        category=_detect_category(text),
         image_url=image_url,
         posted_at=posted_at
     )
-
     db.add(db_post)
     db.commit()
     db.refresh(db_post)
+    print(f"✅ [WEBHOOK] Новый пост: {title}")
+    return db_post
 
-    print(f"✅ [WEBHOOK] Saved post: {title}")
 
-    # Отправляем уведомления студентам
-    print(f"📢 [WEBHOOK] Отправляю уведомления студентам...")
+def _notify_students(title: str, content: str, db: Session, telegram_service):
+    """Отправить уведомления всем студентам"""
+    from ..models import NotificationPreference
 
     notification_prefs = db.query(NotificationPreference).filter(
         NotificationPreference.telegram_enabled == True,
@@ -125,9 +111,92 @@ def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
         else:
             print(f"❌ Failed to send to {pref.student_id}: {error}")
 
-    print(f"✨ [WEBHOOK] Sent {success_count} notifications")
+    return success_count
 
-    return {"ok": True, "saved": True, "notifications_sent": success_count}
+
+@router.post("/webhook")
+def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
+    """Получает обновления из Telegram бота через webhook:
+    - channel_post: новый пост
+    - edited_channel_post: редактирование поста
+    - Автоматически детектирует удаленные посты если message_id "прыгает"
+    """
+    from .. import telegram_service
+    from ..models import NotificationPreference
+
+    print(f"📬 [WEBHOOK] Получено обновление из Telegram")
+    update_id = data.get("update_id")
+
+    # 1️⃣ НОВЫЙ ПОСТ
+    if "channel_post" in data:
+        message = data.get("channel_post", {})
+        message_id = message.get("message_id")
+        chat_id = message.get("chat", {}).get("id")
+
+        print(f"📮 [WEBHOOK] Новый пост #{message_id}")
+
+        if chat_id != -1004422220327:
+            return {"ok": True}
+
+        if not message_id:
+            return {"ok": True}
+
+        # Проверяем есть ли "пропущенные" message_id (значит посты были удалены в Telegram)
+        max_existing = db.query(TelegramPost.telegram_message_id).order_by(
+            TelegramPost.telegram_message_id.desc()
+        ).first()
+
+        if max_existing and message_id > max_existing[0] + 1:
+            # Есть gap между последним постом в БД и новым постом
+            # Это значит что посты в этом диапазоне удалены из Telegram
+            gap_start = max_existing[0] + 1
+            gap_end = message_id
+
+            print(f"🗑️  [WEBHOOK] Детектирован gap: {gap_start}...{gap_end-1}")
+
+            # Удаляем посты из БД которые в этом диапазоне
+            deleted_count = 0
+            for gap_id in range(gap_start, gap_end):
+                deleted_post = db.query(TelegramPost).filter(
+                    TelegramPost.telegram_message_id == gap_id
+                ).first()
+                if deleted_post:
+                    print(f"  🗑️  Удаляю пост #{gap_id}: {deleted_post.title}")
+                    db.delete(deleted_post)
+                    deleted_count += 1
+
+            if deleted_count > 0:
+                db.commit()
+                print(f"✨ [WEBHOOK] Удалено {deleted_count} постов из БД")
+
+        post = _save_or_update_post(message, db, is_edit=False)
+        if post:
+            _notify_students(post.title, post.content, db, telegram_service)
+
+        return {"ok": True, "type": "new_post"}
+
+    # 2️⃣ РЕДАКТИРОВАНИЕ ПОСТА
+    elif "edited_channel_post" in data:
+        message = data.get("edited_channel_post", {})
+        message_id = message.get("message_id")
+        chat_id = message.get("chat", {}).get("id")
+
+        print(f"✏️  [WEBHOOK] Редактирование поста #{message_id}")
+
+        if chat_id != -1004422220327:
+            return {"ok": True}
+
+        if not message_id:
+            return {"ok": True}
+
+        post = _save_or_update_post(message, db, is_edit=True)
+        if post:
+            print(f"✨ Пост #{message_id} обновлён")
+
+        return {"ok": True, "type": "edited_post"}
+
+    # 3️⃣ УДАЛЕНИЕ ПОСТА (через /sync с проверкой)
+    return {"ok": True}
 
 @router.post("/sync")
 def sync_telegram_posts(db: Session = Depends(get_db)):
@@ -274,4 +343,29 @@ def create_telegram_post(post: TelegramPostCreate, db: Session = Depends(get_db)
     print(f"✅ [TELEGRAM] Created post manually: {post.telegram_message_id}")
 
     return db_post
+
+
+@router.delete("/posts/{post_id}")
+def delete_telegram_post(post_id: int, db: Session = Depends(get_db)):
+    """Удалить пост из БД (когда удален из Telegram)"""
+    post = db.query(TelegramPost).filter(TelegramPost.id == post_id).first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    print(f"🗑️  [TELEGRAM] Удаляю пост #{post.telegram_message_id}: {post.title}")
+    db.delete(post)
+    db.commit()
+
+    return {"message": f"Post {post_id} deleted successfully", "deleted_id": post_id}
+
+
+@router.post("/sync-deletions")
+def sync_telegram_deletions(db: Session = Depends(get_db)):
+    """⚠️  DEPRECATED - Telegram Bot API не поддерживает получение списка постов с канала"""
+    return {
+        "message": "Use DELETE /api/telegram/posts/{post_id} instead to delete individual posts",
+        "deleted": 0,
+        "note": "Telegram Bot API limitation: cannot fetch posts from channels for verification"
+    }
 

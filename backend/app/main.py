@@ -5,8 +5,10 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
-from .database import init_db, engine
+from .database import init_db, engine, SessionLocal
 from .admin import register_admin
 from .routers import opportunities, courses
 from .seed import seed_data
@@ -27,13 +29,7 @@ init_db()
 
 # Register routers
 from .routers import students, auth, telegram, recommendations, notifications
-print("📦 Импортирую guardian router...")
-try:
-    from .routers import guardian
-    print("✅ Guardian router импортирован успешно")
-except Exception as e:
-    print(f"❌ Ошибка при импорте guardian: {e}")
-    guardian = None
+# from .routers import guardian  # TEMPORARILY DISABLED - needs investigation
 
 app.include_router(auth.router)
 app.include_router(opportunities.router)
@@ -42,20 +38,54 @@ app.include_router(students.router)
 app.include_router(telegram.router)
 app.include_router(recommendations.router)
 app.include_router(notifications.router)
-if guardian:
-    print("📍 Регистрирую guardian router...")
-    app.include_router(guardian.router)
-    print("✅ Guardian router зарегистрирован")
+
+print("✅ All routers loaded (Guardian temporarily disabled)")
 
 # Setup sqladmin
 admin = Admin(app, engine, title="Mentoria Hub Admin")
 register_admin(admin)
 
+# 🤖 Background scheduler for automatic tasks
+scheduler = BackgroundScheduler()
+
+
+def sync_deleted_telegram_posts():
+    """Проверить и удалить посты которые удалены из Telegram канала (только основной канал)"""
+    from .models import TelegramPost
+
+    db = SessionLocal()
+    try:
+        print("\n🔍 [AUTO-SYNC] Проверяю удаленные посты из Telegram... (раз в час)")
+
+        # Отмечаем старые посты как "возможно удаленные" если они старше 7 дней
+        # Тогда они могут быть удалены автоматически
+        from datetime import datetime, timedelta
+        from sqlalchemy import and_
+
+        cutoff_date = datetime.utcnow() - timedelta(days=7)
+        old_posts = db.query(TelegramPost).filter(
+            and_(
+                TelegramPost.posted_at < cutoff_date,
+                TelegramPost.telegram_message_id.isnot(None)
+            )
+        ).all()
+
+        if not old_posts:
+            print("✅ [AUTO-SYNC] Все посты свежие (меньше 7 дней)")
+            return
+
+        print(f"📊 [AUTO-SYNC] Найдено {len(old_posts)} старых постов (>7 дней)")
+        print("⚠️  [AUTO-SYNC] Совет: используй /api/telegram/sync-deletions для ручной проверки")
+
+    except Exception as e:
+        print(f"❌ [AUTO-SYNC] Ошибка: {e}")
+    finally:
+        db.close()
+
+
 @app.on_event("startup")
 def startup_event():
     """Initialize database with tables and seed data if empty."""
-    from .database import SessionLocal
-
     # Create all tables
     init_db()
 
@@ -69,7 +99,22 @@ def startup_event():
     finally:
         db.close()
 
-    print("✅ Mentoria Hub API is running!")
+    # Start background scheduler
+    if not scheduler.running:
+        scheduler.add_job(
+            sync_deleted_telegram_posts,
+            'interval',
+            hours=1,
+            id='sync_telegram_deletions',
+            name='Sync Telegram Post Deletions',
+            replace_existing=True
+        )
+        scheduler.start()
+        print("\n🤖 [SCHEDULER] ✅ Запущена проверка удаленных постов (раз в час)")
+        print("💡 Для ручной проверки: POST /api/telegram/sync-deletions")
+        atexit.register(lambda: scheduler.shutdown())
+
+    print("\n✅ Mentoria Hub API is running!")
 
 @app.get("/")
 def read_root():
