@@ -16,18 +16,24 @@ class TelegramWebhook(BaseModel):
 @router.post("/webhook")
 def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
     """Получает сообщения из Telegram бота через webhook"""
+    from .. import telegram_service
+    from ..models import NotificationPreference
 
-    # Извлекаем данные из Telegram API
-    if "message" not in data:
+    print(f"📬 [WEBHOOK] Получено обновление из Telegram")
+
+    # Проверяем что это channel_post
+    if "channel_post" not in data:
         return {"ok": True}
 
-    message = data.get("message", {})
+    message = data.get("channel_post", {})
     message_id = message.get("message_id")
+    chat_id = message.get("chat", {}).get("id")
 
-    # Проверяем что это сообщение из канала
-    if "channel_post" in data:
-        message = data.get("channel_post", {})
-        message_id = message.get("message_id")
+    print(f"📮 [WEBHOOK] Channel post #{message_id} from chat {chat_id}")
+
+    # Проверяем что это из нашего канала
+    if chat_id != -1004422220327:  # @mentoria_updates
+        return {"ok": True}
 
     if not message_id:
         return {"ok": True}
@@ -38,9 +44,10 @@ def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
     ).first()
 
     if existing:
+        print(f"⏭️  Post #{message_id} already exists")
         return {"ok": True}
 
-    # Извлекаем текст (может быть text или caption для фото/видео)
+    # Извлекаем текст
     text = message.get("text") or message.get("caption") or ""
 
     if not text:
@@ -48,15 +55,29 @@ def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
 
     # Парсим текст: первая строка = title, остальное = content
     lines = text.split("\n", 1)
-    title = lines[0][:100]  # Максимум 100 символов
-    content = lines[1] if len(lines) > 1 else lines[0]
+    title = lines[0][:100]
+    content = "\n".join(lines[1:]) if len(lines) > 1 else text
+
+    # Определяем категорию
+    def detect_category(text):
+        text_lower = text.lower()
+        if any(word in text_lower for word in ["hiring", "job", "career", "vacancy"]):
+            return "hiring"
+        elif any(word in text_lower for word in ["course", "program", "training", "bootcamp"]):
+            return "programs"
+        elif any(word in text_lower for word in ["hackathon", "competition", "olympiad", "internship"]):
+            return "opportunities"
+        elif any(word in text_lower for word in ["announce", "news", "launch", "update"]):
+            return "news"
+        elif any(word in text_lower for word in ["tip", "advice", "guide"]):
+            return "tips"
+        return "general"
 
     # Извлекаем фото если есть
     image_url = None
     if "photo" in message:
         photos = message.get("photo", [])
         if photos:
-            # Берём самое большое фото
             largest_photo = max(photos, key=lambda p: p.get("file_size", 0))
             image_url = f"https://api.telegram.org/file/bot{largest_photo.get('file_id')}"
 
@@ -68,16 +89,45 @@ def handle_telegram_webhook(data: dict, db: Session = Depends(get_db)):
         telegram_message_id=message_id,
         title=title,
         content=content,
+        category=detect_category(text),
         image_url=image_url,
         posted_at=posted_at
     )
 
     db.add(db_post)
     db.commit()
+    db.refresh(db_post)
 
-    print(f"✅ [TELEGRAM] Saved post #{message_id}")
+    print(f"✅ [WEBHOOK] Saved post: {title}")
 
-    return {"ok": True}
+    # Отправляем уведомления студентам
+    print(f"📢 [WEBHOOK] Отправляю уведомления студентам...")
+
+    notification_prefs = db.query(NotificationPreference).filter(
+        NotificationPreference.telegram_enabled == True,
+        NotificationPreference.telegram_chat_id.isnot(None)
+    ).all()
+
+    success_count = 0
+    for pref in notification_prefs:
+        if not pref.telegram_chat_id:
+            continue
+
+        message_text = telegram_service.format_new_post_notification(title, content)
+        success, error = telegram_service.send_telegram_message(
+            chat_id=pref.telegram_chat_id,
+            text=message_text
+        )
+
+        if success:
+            success_count += 1
+            print(f"✅ Notification sent to student {pref.student_id}")
+        else:
+            print(f"❌ Failed to send to {pref.student_id}: {error}")
+
+    print(f"✨ [WEBHOOK] Sent {success_count} notifications")
+
+    return {"ok": True, "saved": True, "notifications_sent": success_count}
 
 @router.post("/sync")
 def sync_telegram_posts(db: Session = Depends(get_db)):
