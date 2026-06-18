@@ -148,6 +148,35 @@ export const api = {
     return response.json();
   },
 
+  getLessonProgress: async (lessonId, studentId) => {
+    const response = await fetch(`${API_BASE_URL}/courses/lesson/${lessonId}/progress/${studentId}`);
+    return response.json();
+  },
+
+  getLessonComments: async (lessonId) => {
+    const response = await fetch(`${API_BASE_URL}/courses/lesson/${lessonId}/comments`);
+    return response.json();
+  },
+
+  postLessonComment: async (lessonId, studentId, text) => {
+    const response = await fetch(`${API_BASE_URL}/courses/lesson/${lessonId}/comments/${studentId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) throw new Error('Failed to post comment');
+    return response.json();
+  },
+
+  getCourseProgress: async (courseId, studentId) => {
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/progress/${studentId}`);
+    return response.json();
+  },
+
+  getCertificateUrl: (courseId, studentId) => {
+    return `${API_BASE_URL}/courses/${courseId}/certificate/${studentId}`;
+  },
+
   // Students
   createStudent: async (data) => {
     const response = await fetch(`${API_BASE_URL}/students/`, {

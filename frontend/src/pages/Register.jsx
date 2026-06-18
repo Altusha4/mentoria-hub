@@ -161,132 +161,230 @@ export default function Register({ setStudentId }) {
     { number: 4, label: 'Secure', icon: '🔐' },
   ];
 
+  // ── shared styles ──
+  const inputStyle = {
+    width: '100%',
+    padding: '12px 16px',
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    borderRadius: '12px',
+    color: '#fff',
+    fontSize: '15px',
+    outline: 'none',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+  };
+
+  const inputFocus = (e) => {
+    e.target.style.borderColor = '#3cc5e0';
+    e.target.style.boxShadow = '0 0 0 3px rgba(60,197,224,0.25)';
+  };
+
+  const inputBlur = (e) => {
+    e.target.style.borderColor = 'rgba(255,255,255,0.15)';
+    e.target.style.boxShadow = 'none';
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '13px',
+    fontWeight: 600,
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: '8px',
+    letterSpacing: '0.3px',
+  };
+
   return (
-    <div className="min-h-screen py-12 px-4 flex items-center justify-center" style={{
-      background: 'linear-gradient(to bottom right, #0a1628, #2195c4, #20c0a0)'
+    <div style={{
+      minHeight: '100vh',
+      padding: '40px 16px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #060d18 0%, #0a1628 40%, #0f2a3d 70%, #0a1628 100%)',
+      position: 'relative',
+      overflow: 'hidden',
     }}>
-      <div className="w-full max-w-2xl">
+      {/* Background orbs */}
+      <div style={{
+        position: 'absolute', top: '-120px', left: '-80px',
+        width: '400px', height: '400px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(60,197,224,0.12) 0%, transparent 70%)',
+        filter: 'blur(40px)', pointerEvents: 'none',
+      }} className="mentoria-orbFloat" />
+      <div style={{
+        position: 'absolute', bottom: '-100px', right: '-60px',
+        width: '350px', height: '350px', borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(32,192,160,0.10) 0%, transparent 70%)',
+        filter: 'blur(40px)', pointerEvents: 'none',
+      }} className="mentoria-orbFloat" />
+
+      <div style={{ width: '100%', maxWidth: '640px', position: 'relative', zIndex: 1 }}>
         {/* Header */}
-        <div className="text-center mb-8 text-white">
-          <img src="/logo.png" alt="Mentoria" className="w-16 h-16 mx-auto mb-4 object-contain" />
-          <h1 className="text-4xl font-bold mb-2">Join Mentoria Hub</h1>
-          <p style={{ color: '#b0e0f0' }}>Create your account in just 4 steps</p>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }} className="mentoria-fadeInUp">
+          <img src="/logo.png" alt="Mentoria" style={{
+            width: '56px', height: '56px', objectFit: 'contain', margin: '0 auto 16px',
+            filter: 'drop-shadow(0 0 20px rgba(60,197,224,0.4))',
+          }} />
+          <h1 style={{
+            fontSize: '32px', fontWeight: 800, color: '#fff', margin: '0 0 8px',
+            background: 'linear-gradient(135deg, #fff 0%, #3cc5e0 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>
+            Join Mentoria Hub
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px', margin: 0 }}>
+            Create your account in just 4 steps
+          </p>
         </div>
 
         {/* Progress Indicator */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-6">
-            {steps.map((step) => (
-              <div key={step.number} className="flex flex-col items-center flex-1">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all mb-2 ${
-                    currentStep >= step.number
-                      ? 'bg-white shadow-lg'
-                      : 'bg-white bg-opacity-30 text-white'
-                  }`}
-                  style={currentStep >= step.number ? { color: '#2195c4' } : {}}
-                >
+        <div style={{ marginBottom: '32px' }} className="mentoria-fadeInUp mentoria-delay-1">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            {steps.map((step, idx) => (
+              <div key={step.number} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, position: 'relative' }}>
+                {/* Connector line */}
+                {idx < steps.length - 1 && (
+                  <div style={{
+                    position: 'absolute', top: '22px', left: '55%', width: '90%', height: '2px',
+                    background: currentStep > step.number
+                      ? 'linear-gradient(90deg, #3cc5e0, #20c0a0)'
+                      : 'rgba(255,255,255,0.1)',
+                    transition: 'background 0.3s',
+                  }} />
+                )}
+                <div style={{
+                  width: '44px', height: '44px', borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '20px', fontWeight: 700, marginBottom: '8px',
+                  background: currentStep >= step.number
+                    ? 'linear-gradient(135deg, #3cc5e0, #20c0a0)'
+                    : 'rgba(255,255,255,0.08)',
+                  border: currentStep >= step.number ? 'none' : '1px solid rgba(255,255,255,0.12)',
+                  boxShadow: currentStep >= step.number ? '0 4px 20px rgba(60,197,224,0.3)' : 'none',
+                  transition: 'all 0.3s',
+                  position: 'relative', zIndex: 1,
+                }}>
                   {step.icon}
                 </div>
-                <span className="text-sm font-semibold" style={{ color: currentStep >= step.number ? 'white' : '#b0e0f0' }}>
+                <span style={{
+                  fontSize: '12px', fontWeight: 600,
+                  color: currentStep >= step.number ? '#3cc5e0' : 'rgba(255,255,255,0.35)',
+                  transition: 'color 0.3s',
+                }}>
                   {step.label}
                 </span>
               </div>
             ))}
           </div>
           {/* Progress Bar */}
-          <div className="h-1 bg-white bg-opacity-20 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-white transition-all duration-300"
-              style={{ width: `${(currentStep / 4) * 100}%` }}
-            ></div>
+          <div style={{
+            height: '3px', borderRadius: '4px',
+            background: 'rgba(255,255,255,0.08)', overflow: 'hidden',
+          }}>
+            <div style={{
+              height: '100%', borderRadius: '4px',
+              background: 'linear-gradient(90deg, #3cc5e0, #20c0a0)',
+              width: `${(currentStep / 4) * 100}%`,
+              transition: 'width 0.4s ease',
+            }} />
           </div>
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 mb-6">
+        <div className="mentoria-fadeInUp mentoria-delay-2" style={{
+          background: 'rgba(255,255,255,0.05)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '20px',
+          padding: '36px',
+          marginBottom: '24px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        }}>
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
-              <p className="text-red-700 font-semibold text-sm">{error}</p>
+            <div style={{
+              marginBottom: '20px', padding: '14px 18px',
+              background: 'rgba(239,68,68,0.12)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              borderRadius: '12px',
+            }}>
+              <p style={{ color: '#f87171', fontWeight: 600, fontSize: '14px', margin: 0 }}>⚠️ {error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit}>
             {/* Step 1: Personal Info */}
             {currentStep === 1 && (
-              <div className="space-y-6 animate-fadeIn">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Personal Information</h2>
-                </div>
+              <div className="mentoria-fadeInUp" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+                  Personal Information
+                </h2>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
+                    <label style={labelStyle}>First Name *</label>
                     <input
                       type="text"
                       value={formData.first_name}
                       onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
-                      style={{ focus: 'none' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                      style={inputStyle}
+                      onFocus={inputFocus}
+                      onBlur={inputBlur}
                       placeholder="John"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
+                    <label style={labelStyle}>Last Name *</label>
                     <input
                       type="text"
                       value={formData.last_name}
                       onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
-                      style={{ focus: 'none' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                      style={inputStyle}
+                      onFocus={inputFocus}
+                      onBlur={inputBlur}
                       placeholder="Doe"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                  <label style={labelStyle}>Email Address *</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
-                    style={{ focus: 'none' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    style={inputStyle}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
                     placeholder="you@example.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Grade Level *</label>
+                  <label style={labelStyle}>Grade Level *</label>
                   <select
                     value={formData.grade}
                     onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
-                    style={{ focus: 'none' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    style={{ ...inputStyle, cursor: 'pointer', appearance: 'none' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
                   >
                     {grades.map(grade => (
-                      <option key={grade} value={grade}>Grade {grade}</option>
+                      <option key={grade} value={grade} style={{ background: '#0a1628', color: '#fff' }}>
+                        Grade {grade}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">About You (Bio)</label>
+                  <label style={labelStyle}>About You (Bio)</label>
                   <textarea
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
-                    style={{ focus: 'none' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    style={{ ...inputStyle, resize: 'none', minHeight: '80px' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
                     rows="3"
                     placeholder="Tell us about yourself, your background, achievements..."
                   />
@@ -296,62 +394,71 @@ export default function Register({ setStudentId }) {
 
             {/* Step 2: Interests & Goals */}
             {currentStep === 2 && (
-              <div className="space-y-6 animate-fadeIn">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Interests & Goals</h2>
-                </div>
+              <div className="mentoria-fadeInUp" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+                  Your Interests & Goals
+                </h2>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-4">What interests you? *</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {interestOptions.map(interest => (
-                      <button
-                        key={interest}
-                        type="button"
-                        onClick={() => handleInterestToggle(interest)}
-                        className={`p-3 border-2 rounded-lg font-semibold transition-all ${
-                          formData.interests.includes(interest)
-                            ? 'bg-blue-50 text-gray-700 hover:border-gray-300'
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                        }`}
-                        style={formData.interests.includes(interest) ? { borderColor: '#2195c4', backgroundColor: '#e0f2fe', color: '#2195c4' } : {}}
-                      >
-                        {interest}
-                      </button>
-                    ))}
+                  <label style={{ ...labelStyle, marginBottom: '14px' }}>What interests you? *</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {interestOptions.map(interest => {
+                      const active = formData.interests.includes(interest);
+                      return (
+                        <button
+                          key={interest}
+                          type="button"
+                          onClick={() => handleInterestToggle(interest)}
+                          style={{
+                            padding: '12px 16px', borderRadius: '12px', fontWeight: 600,
+                            fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s',
+                            border: active ? '1px solid #3cc5e0' : '1px solid rgba(255,255,255,0.12)',
+                            background: active ? 'rgba(60,197,224,0.15)' : 'rgba(255,255,255,0.04)',
+                            color: active ? '#3cc5e0' : 'rgba(255,255,255,0.7)',
+                            boxShadow: active ? '0 0 16px rgba(60,197,224,0.15)' : 'none',
+                          }}
+                        >
+                          {interest}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-4">Your Subjects</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {subjectOptions.map(subject => (
-                      <button
-                        key={subject}
-                        type="button"
-                        onClick={() => handleSubjectToggle(subject)}
-                        className={`p-3 border-2 rounded-lg font-semibold transition-all ${
-                          formData.subjects.includes(subject)
-                            ? 'bg-green-50 text-gray-700 hover:border-gray-300'
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                        }`}
-                        style={formData.subjects.includes(subject) ? { borderColor: '#20c0a0', backgroundColor: '#e0f7f3', color: '#20c0a0' } : {}}
-                      >
-                        {subject}
-                      </button>
-                    ))}
+                  <label style={{ ...labelStyle, marginBottom: '14px' }}>Your Subjects</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    {subjectOptions.map(subject => {
+                      const active = formData.subjects.includes(subject);
+                      return (
+                        <button
+                          key={subject}
+                          type="button"
+                          onClick={() => handleSubjectToggle(subject)}
+                          style={{
+                            padding: '12px 16px', borderRadius: '12px', fontWeight: 600,
+                            fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s',
+                            border: active ? '1px solid #20c0a0' : '1px solid rgba(255,255,255,0.12)',
+                            background: active ? 'rgba(32,192,160,0.15)' : 'rgba(255,255,255,0.04)',
+                            color: active ? '#20c0a0' : 'rgba(255,255,255,0.7)',
+                            boxShadow: active ? '0 0 16px rgba(32,192,160,0.15)' : 'none',
+                          }}
+                        >
+                          {subject}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Your Goals & Ambitions</label>
+                  <label style={labelStyle}>Your Goals & Ambitions</label>
                   <textarea
                     value={formData.goals}
                     onChange={(e) => setFormData({ ...formData, goals: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
-                    style={{ focus: 'none' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    style={{ ...inputStyle, resize: 'none', minHeight: '80px' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
                     rows="3"
                     placeholder="E.g., Get into top university, learn programming, win competitions..."
                   />
@@ -361,126 +468,125 @@ export default function Register({ setStudentId }) {
 
             {/* Step 3: Background & Academic Stats */}
             {currentStep === 3 && (
-              <div className="space-y-6 animate-fadeIn">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Background</h2>
+              <div className="mentoria-fadeInUp" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+                  Your Background
+                </h2>
+
+                <div style={{
+                  padding: '14px 18px', borderRadius: '12px',
+                  background: 'rgba(60,197,224,0.08)',
+                  border: '1px solid rgba(60,197,224,0.2)',
+                }}>
+                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', margin: 0 }}>
+                    📊 <span style={{ fontWeight: 600, color: '#3cc5e0' }}>Optional:</span> Share your academic achievements to get better opportunities
+                  </p>
                 </div>
 
-                <div className="rounded-lg p-4 mb-6" style={{ backgroundColor: '#e0f2fe' }}>
-                  <p className="text-sm text-gray-600">📊 <span className="font-semibold">Optional:</span> Share your academic achievements to get better opportunities</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">GPA</label>
-                    <div className="flex gap-2">
+                    <label style={labelStyle}>GPA</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <input
                         type="number"
                         step="0.1"
                         value={formData.gpa}
                         onChange={(e) => setFormData({ ...formData, gpa: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
-                        style={{ focus: 'none' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        style={{ ...inputStyle, flex: 1 }}
+                        onFocus={inputFocus}
+                        onBlur={inputBlur}
                         placeholder="3.8"
                       />
-                      <span className="px-3 py-3 text-gray-600 font-semibold">/4.0</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: '14px' }}>/4.0</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">IELTS Score</label>
-                    <div className="flex gap-2">
+                    <label style={labelStyle}>IELTS Score</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <input
                         type="number"
                         step="0.1"
                         value={formData.ielts_score}
                         onChange={(e) => setFormData({ ...formData, ielts_score: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
-                        style={{ focus: 'none' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        style={{ ...inputStyle, flex: 1 }}
+                        onFocus={inputFocus}
+                        onBlur={inputBlur}
                         placeholder="7.5"
                       />
-                      <span className="px-3 py-3 text-gray-600 font-semibold">/9.0</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: '14px' }}>/9.0</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">TOEFL Score</label>
-                    <div className="flex gap-2">
+                    <label style={labelStyle}>TOEFL Score</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <input
                         type="number"
                         value={formData.toefl_score}
                         onChange={(e) => setFormData({ ...formData, toefl_score: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
-                        style={{ focus: 'none' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        style={{ ...inputStyle, flex: 1 }}
+                        onFocus={inputFocus}
+                        onBlur={inputBlur}
                         placeholder="105"
                       />
-                      <span className="px-3 py-3 text-gray-600 font-semibold">/120</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: '14px' }}>/120</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">SAT Score</label>
-                    <div className="flex gap-2">
+                    <label style={labelStyle}>SAT Score</label>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <input
                         type="number"
                         value={formData.sat_score}
                         onChange={(e) => setFormData({ ...formData, sat_score: e.target.value })}
-                        className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
-                        style={{ focus: 'none' }}
-                        onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                        style={{ ...inputStyle, flex: 1 }}
+                        onFocus={inputFocus}
+                        onBlur={inputBlur}
                         placeholder="1450"
                       />
-                      <span className="px-3 py-3 text-gray-600 font-semibold">/1600</span>
+                      <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: '14px' }}>/1600</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Sports & Activities</label>
+                  <label style={labelStyle}>Sports & Activities</label>
                   <textarea
                     value={formData.activities}
                     onChange={(e) => setFormData({ ...formData, activities: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
-                    style={{ focus: 'none' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    style={{ ...inputStyle, resize: 'none', minHeight: '64px' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
                     rows="2"
                     placeholder="E.g., Football (3 years), Volleyball club, Student council..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Certificates & Awards</label>
+                  <label style={labelStyle}>Certificates & Awards</label>
                   <textarea
                     value={formData.certificates}
                     onChange={(e) => setFormData({ ...formData, certificates: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
-                    style={{ focus: 'none' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    style={{ ...inputStyle, resize: 'none', minHeight: '64px' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
                     rows="2"
                     placeholder="E.g., Math Olympiad (1st), Cambridge English, Science Fair..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Skills</label>
+                  <label style={labelStyle}>Skills</label>
                   <textarea
                     value={formData.skills}
                     onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
-                    style={{ focus: 'none' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                    style={{ ...inputStyle, resize: 'none', minHeight: '64px' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
                     rows="2"
-                    placeholder="E.g., Python, Leadership, Data Analysis, Problem Solving (comma-separated)"
+                    placeholder="E.g., Python, Leadership, Data Analysis (comma-separated)"
                   />
                 </div>
               </div>
@@ -488,59 +594,62 @@ export default function Register({ setStudentId }) {
 
             {/* Step 4: Documents & Security */}
             {currentStep === 4 && (
-              <div className="space-y-6 animate-fadeIn">
+              <div className="mentoria-fadeInUp" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+                  Documents & Security
+                </h2>
+
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Documents & Security</h2>
+                  <label style={labelStyle}>Motivation Letter</label>
+                  <textarea
+                    value={formData.motivation_letter}
+                    onChange={(e) => setFormData({ ...formData, motivation_letter: e.target.value })}
+                    style={{ ...inputStyle, resize: 'none', minHeight: '80px' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
+                    rows="3"
+                    placeholder="Share your goals and why you want to join Mentoria..."
+                  />
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Motivation Letter</label>
-                    <textarea
-                      value={formData.motivation_letter}
-                      onChange={(e) => setFormData({ ...formData, motivation_letter: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none"
-                      style={{ focus: 'none' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                      rows="3"
-                      placeholder="Share your goals and why you want to join Mentoria..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">CV (Text)</label>
-                    <textarea
-                      value={formData.cv_text}
-                      onChange={(e) => setFormData({ ...formData, cv_text: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors resize-none font-mono text-sm"
-                      style={{ focus: 'none' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                      rows="3"
-                      placeholder="Your CV in text format..."
-                    />
-                  </div>
-
+                <div>
+                  <label style={labelStyle}>CV (Text)</label>
+                  <textarea
+                    value={formData.cv_text}
+                    onChange={(e) => setFormData({ ...formData, cv_text: e.target.value })}
+                    style={{ ...inputStyle, resize: 'none', minHeight: '80px', fontFamily: 'monospace', fontSize: '13px' }}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur}
+                    rows="3"
+                    placeholder="Your CV in text format..."
+                  />
                 </div>
 
-                <div className="border-t-2 border-gray-200 pt-6">
+                <div style={{
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  paddingTop: '24px',
+                }}>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
+                    <label style={labelStyle}>Password *</label>
                     <input
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none"
-                      style={{ focus: 'none' }}
-                      onFocus={(e) => e.target.style.borderColor = '#2195c4'}
-                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                      style={inputStyle}
+                      onFocus={inputFocus}
+                      onBlur={inputBlur}
                       placeholder="••••••••"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Minimum 6 characters recommended</p>
+                    <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', marginTop: '6px' }}>
+                      Minimum 6 characters recommended
+                    </p>
                   </div>
 
-                  <div className="p-4 rounded-lg mt-4" style={{ backgroundColor: '#e0f2fe' }}>
+                  <div style={{
+                    marginTop: '16px', padding: '16px', borderRadius: '12px',
+                    background: 'rgba(60,197,224,0.06)',
+                    border: '1px solid rgba(60,197,224,0.15)',
+                  }}>
                     <MathCaptcha onVerify={setCaptchaVerified} />
                   </div>
                 </div>
@@ -548,16 +657,22 @@ export default function Register({ setStudentId }) {
             )}
 
             {/* Navigation Buttons */}
-            <div className="flex gap-4 pt-8 justify-between">
+            <div style={{
+              display: 'flex', gap: '16px', paddingTop: '32px', justifyContent: 'space-between',
+            }}>
               <button
                 type="button"
                 onClick={prevStep}
                 disabled={currentStep === 1}
-                className={`px-8 py-3 font-semibold rounded-lg border-2 transition-all ${
-                  currentStep === 1
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
+                style={{
+                  padding: '12px 28px', fontWeight: 600, borderRadius: '12px',
+                  fontSize: '15px', cursor: currentStep === 1 ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'transparent',
+                  color: currentStep === 1 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.7)',
+                  opacity: currentStep === 1 ? 0.5 : 1,
+                }}
               >
                 ← Back
               </button>
@@ -566,8 +681,13 @@ export default function Register({ setStudentId }) {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="px-8 py-3 text-white font-semibold rounded-lg hover:opacity-90 transition-all"
-                  style={{ backgroundColor: '#2195c4' }}
+                  style={{
+                    padding: '12px 32px', fontWeight: 700, borderRadius: '12px',
+                    fontSize: '15px', cursor: 'pointer', border: 'none',
+                    background: 'linear-gradient(135deg, #3cc5e0, #2195c4)',
+                    color: '#fff', transition: 'all 0.2s',
+                    boxShadow: '0 4px 20px rgba(60,197,224,0.3)',
+                  }}
                 >
                   Next →
                 </button>
@@ -575,8 +695,17 @@ export default function Register({ setStudentId }) {
                 <button
                   type="submit"
                   disabled={loading || !captchaVerified}
-                  className="px-8 py-3 text-white font-semibold rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  style={{ backgroundColor: '#20c0a0' }}
+                  style={{
+                    padding: '12px 32px', fontWeight: 700, borderRadius: '12px',
+                    fontSize: '15px', cursor: loading || !captchaVerified ? 'not-allowed' : 'pointer',
+                    border: 'none',
+                    background: loading || !captchaVerified
+                      ? 'rgba(32,192,160,0.3)'
+                      : 'linear-gradient(135deg, #20c0a0, #3cc5e0)',
+                    color: '#fff', transition: 'all 0.2s',
+                    boxShadow: loading || !captchaVerified ? 'none' : '0 4px 20px rgba(32,192,160,0.3)',
+                    opacity: loading || !captchaVerified ? 0.6 : 1,
+                  }}
                 >
                   {loading ? 'Creating account...' : '✅ Create Account'}
                 </button>
@@ -586,10 +715,17 @@ export default function Register({ setStudentId }) {
         </div>
 
         {/* Sign In Link */}
-        <div className="text-center text-white">
-          <p className="text-sm">
+        <div style={{ textAlign: 'center' }} className="mentoria-fadeInUp mentoria-delay-3">
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', margin: 0 }}>
             Already have an account?{' '}
-            <Link to="/login" className="font-bold underline hover:opacity-80">
+            <Link to="/login" style={{
+              color: '#3cc5e0', fontWeight: 700, textDecoration: 'none',
+              borderBottom: '1px solid transparent',
+              transition: 'border-color 0.2s',
+            }}
+              onMouseEnter={(e) => e.target.style.borderBottomColor = '#3cc5e0'}
+              onMouseLeave={(e) => e.target.style.borderBottomColor = 'transparent'}
+            >
               Sign in here
             </Link>
           </p>

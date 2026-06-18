@@ -21,15 +21,28 @@ export default function Course({ studentId }) {
   const [course, setCourse] = useState(null);
   const [enrolled, setEnrolled] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
+  const [progressData, setProgressData] = useState({ progress: 0, completed_lessons: [] });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchCourse(); }, [id]);
+  useEffect(() => { 
+    if (studentId) {
+      fetchCourseData(); 
+    }
+  }, [id, studentId]);
 
-  const fetchCourse = async () => {
+  const fetchCourseData = async () => {
     setLoading(true);
     try {
-      const data = await api.getCourse(id);
-      setCourse(data);
+      const [courseData, progressInfo] = await Promise.all([
+        api.getCourse(id),
+        api.getCourseProgress(id, studentId)
+      ]);
+      setCourse(courseData);
+      
+      if (progressInfo.enrolled) {
+        setEnrolled(true);
+        setProgressData(progressInfo);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -139,10 +152,37 @@ export default function Course({ studentId }) {
                 {enrolling ? 'Enrolling…' : 'Enroll Now'}
               </button>
             ) : (
-              <div className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl"
-                style={{ background: 'rgba(32,192,160,0.12)', border: '1px solid rgba(32,192,160,0.3)' }}>
-                <span className="text-[#20c0a0] text-base">✓</span>
-                <span className="text-sm font-bold text-[#20c0a0]">Enrolled</span>
+              <div className="flex-shrink-0 flex items-center gap-3">
+                <div className="flex items-center gap-2 px-5 py-3 rounded-xl"
+                  style={{ background: 'rgba(32,192,160,0.12)', border: '1px solid rgba(32,192,160,0.3)' }}>
+                  <span className="text-[#20c0a0] text-base">✓</span>
+                  <span className="text-sm font-bold text-[#20c0a0]">Enrolled</span>
+                </div>
+                {progressData.progress >= 100 && (
+                  <a
+                    href={api.getCertificateUrl(id, studentId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                      if (window.confetti) {
+                        window.confetti({
+                          particleCount: 150,
+                          spread: 70,
+                          origin: { y: 0.6 }
+                        });
+                      }
+                    }}
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:scale-[1.02] shadow-lg"
+                    style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)' }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Download Certificate
+                  </a>
+                )}
               </div>
             )}
           </div>
@@ -186,13 +226,22 @@ export default function Course({ studentId }) {
                       : 'hover:bg-gray-50'
                     }`}
                 >
-                  {/* Number bubble */}
-                  <div
-                    className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black transition-all duration-200 group-hover:scale-105"
-                    style={{ background: diff.bg, color: diff.color }}
-                  >
-                    {index + 1}
-                  </div>
+                  {/* Number bubble or Checkmark */}
+                  {progressData.completed_lessons?.includes(lesson.id) ? (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-105"
+                      style={{ background: 'rgba(32,192,160,0.15)' }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#20c0a0" strokeWidth="3" className="w-5 h-5">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <div
+                      className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black transition-all duration-200 group-hover:scale-105"
+                      style={{ background: diff.bg, color: diff.color }}
+                    >
+                      {index + 1}
+                    </div>
+                  )}
 
                   {/* Text */}
                   <div className="flex-1 min-w-0">

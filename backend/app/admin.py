@@ -22,12 +22,16 @@ class SavedOpportunityAdmin(ModelView, model=SavedOpportunity):
 class CourseAdmin(ModelView, model=Course):
     name = "Course"
     name_plural = "Courses"
-    column_list = [Course.id, Course.title, Course.difficulty_level, Course.created_at]
+    column_list = [Course.id, Course.title, Course.difficulty_level, Course.image_url, Course.created_at]
+    form_columns = [Course.title, Course.description, Course.difficulty_level, Course.image_url, Course.tags]
+    column_details_list = [Course.id, Course.title, Course.description, Course.difficulty_level, Course.image_url, Course.tags, Course.created_at]
 
 class LessonAdmin(ModelView, model=Lesson):
     name = "Lesson"
     name_plural = "Lessons"
-    column_list = [Lesson.id, Lesson.title, Lesson.course_id, Lesson.order]
+    column_list = [Lesson.id, Lesson.title, Lesson.course_id, Lesson.video_url, Lesson.order]
+    form_columns = [Lesson.course_id, Lesson.title, Lesson.content, Lesson.video_url, Lesson.order]
+    column_details_list = [Lesson.id, Lesson.course_id, Lesson.title, Lesson.content, Lesson.video_url, Lesson.order, Lesson.created_at]
 
 class QuizAdmin(ModelView, model=Quiz):
     name = "Quiz"

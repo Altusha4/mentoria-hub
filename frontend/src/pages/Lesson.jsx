@@ -5,6 +5,13 @@ import { useTheme } from '../context/ThemeContext';
 import QuizComponent from '../components/QuizComponent';
 import { showToast } from '../utils/toast';
 
+/* ── Helper for YouTube ────────────────────── */
+function getEmbedUrl(url) {
+  if (!url) return '';
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : url;
+}
+
 /* ── Feedback options ────────────────────── */
 const FEEDBACK_OPTIONS = ['Very helpful', 'Helpful', 'Somewhat helpful', 'Not helpful'];
 
@@ -21,6 +28,11 @@ export default function Lesson({ studentId }) {
   const [feedback, setFeedback] = useState('');
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  
+  // Comments state
+  const [comments, setComments] = useState([]);
+  const [newCommentText, setNewCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
 
   /* ── Next/Prev lesson (computed early) ── */
   const lessons = course?.lessons || [];
@@ -33,12 +45,18 @@ export default function Lesson({ studentId }) {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [lessonData, courseData] = await Promise.all([
+      const [lessonData, courseData, progressData, commentsData] = await Promise.all([
         api.getLesson(lessonId),
         api.getCourse(courseId),
+        studentId ? api.getLessonProgress(lessonId, studentId) : Promise.resolve({ completed: false }),
+        api.getLessonComments(lessonId).catch(() => []),
       ]);
       setLesson(lessonData);
       setCourse(courseData);
+      setComments(commentsData);
+      if (progressData?.completed) {
+        setCompleted(true);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -98,6 +116,22 @@ export default function Lesson({ studentId }) {
     setQuizSubmitted(true);
   };
 
+  const handlePostComment = async () => {
+    if (!newCommentText.trim() || !studentId || submittingComment) return;
+    setSubmittingComment(true);
+    try {
+      const newComment = await api.postLessonComment(lessonId, studentId, newCommentText);
+      setComments([newComment, ...comments]);
+      setNewCommentText('');
+      showToast.success('Comment posted!');
+    } catch (e) {
+      console.error(e);
+      showToast.error('Failed to post comment');
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
   /* ── Loading ── */
   if (loading) {
     return (
@@ -126,11 +160,13 @@ export default function Lesson({ studentId }) {
     );
   }
 
-  const lessonNum = currentIdx >= 0 ? currentIdx + 1 : null; const handleNextNavigation = () => {
+  const lessonNum = currentIdx >= 0 ? currentIdx + 1 : null; 
+  
+  const handleNextNavigation = () => {
     if (nextLesson) {
-      navigate(`/course/${courseId}/lesson/${nextLesson.id}`);
+      navigate(`/courses/${courseId}/lesson/${nextLesson.id}`);
     } else {
-      navigate(`/course/${courseId}`);
+      navigate(`/courses/${courseId}`);
     }
   };
 
@@ -212,7 +248,7 @@ export default function Lesson({ studentId }) {
             <iframe
               width="100%"
               height="100%"
-              src={lesson.video_url.replace('watch?v=', 'embed/')}
+              src={getEmbedUrl(lesson.video_url)}
               frameBorder="0"
               allowFullScreen
               title={lesson.title}
@@ -351,6 +387,82 @@ export default function Lesson({ studentId }) {
             <span className="text-sm font-black text-[#20c0a0]">Lesson Completed!</span>
           </div>
         )}
+
+        {/* ═════ COMMENTS SECTION ══════════════════ */}
+        <div className={`rounded-2xl border overflow-hidden ${theme === 'dark' ? 'bg-white/[0.03] border-white/[0.06]' : 'bg-white border-gray-100 shadow-sm'}`}>
+          <div className={`px-7 py-5 border-b ${theme === 'dark' ? 'border-white/[0.06]' : 'border-gray-100'}`}>
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-5 rounded-full bg-[#f59e0b]" />
+              <h2 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Comments ({comments.length})
+              </h2>
+            </div>
+          </div>
+          
+          <div className="p-7">
+            {/* New comment input */}
+            {studentId ? (
+              <div className="mb-8">
+                <textarea
+                  value={newCommentText}
+                  onChange={(e) => setNewCommentText(e.target.value)}
+                  placeholder="Ask a question or share your thoughts..."
+                  className={`w-full rounded-xl p-4 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3cc5e0]/50 transition-all
+                    ${theme === 'dark' 
+                      ? 'bg-black/40 border border-white/[0.06] text-white placeholder-gray-500 focus:border-transparent' 
+                      : 'bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:border-transparent'}`}
+                  rows="3"
+                />
+                <div className="flex justify-end mt-3">
+                  <button
+                    onClick={handlePostComment}
+                    disabled={submittingComment || !newCommentText.trim()}
+                    className={`px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all
+                      ${submittingComment || !newCommentText.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90 hover:scale-[1.02]'}`}
+                    style={{ background: 'linear-gradient(135deg, #3cc5e0, #20c0a0)' }}
+                  >
+                    {submittingComment ? 'Posting...' : 'Post Comment'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className={`p-4 rounded-xl mb-8 text-center text-sm ${theme === 'dark' ? 'bg-white/[0.02] text-gray-400' : 'bg-gray-50 text-gray-500'}`}>
+                Please log in to post a comment.
+              </div>
+            )}
+
+            {/* Comments list */}
+            <div className="space-y-5">
+              {comments.map(comment => (
+                <div key={comment.id} className={`p-5 rounded-xl border ${theme === 'dark' ? 'bg-black/20 border-white/[0.04]' : 'bg-white border-gray-100 shadow-sm'}`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm border"
+                      style={{ background: 'rgba(60,197,224,0.1)', borderColor: 'rgba(60,197,224,0.2)' }}>
+                      {comment.student?.avatar_emoji || '👤'}
+                    </div>
+                    <div>
+                      <div className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {comment.student?.first_name || 'Anonymous'} {comment.student?.last_name || ''}
+                      </div>
+                      <div className={`text-[10px] uppercase tracking-wider ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                        {new Date(comment.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <p className={`text-sm leading-relaxed pl-11 whitespace-pre-wrap ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                    {comment.text}
+                  </p>
+                </div>
+              ))}
+              
+              {comments.length === 0 && (
+                <div className={`text-center py-8 text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                  No comments yet. Be the first to share your thoughts!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* ═════ PREV / NEXT NAVIGATION ═══════════ */}
         <div className={`grid gap-3 ${prevLesson && nextLesson ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
