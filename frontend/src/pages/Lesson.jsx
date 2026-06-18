@@ -51,10 +51,12 @@ export default function Lesson({ studentId }) {
 
     // Show quiz first if exists and not submitted
     if (lesson?.quiz && !quizSubmitted) {
+      console.log('📝 Showing quiz:', lesson.quiz);
       setShowQuiz(true);
       return;
     }
 
+    console.log('✅ No quiz or already submitted, completing lesson...');
     setCompleting(true);
     try {
       await api.completeLesson(lessonId, studentId);
@@ -329,14 +331,14 @@ export default function Lesson({ studentId }) {
             {completing ? (
               <>
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Marking complete…
+                {lesson?.quiz ? 'Loading quiz…' : 'Marking complete…'}
               </>
             ) : (
               <>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-5 h-5">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
-                Mark as Complete & Continue
+                {lesson?.quiz ? 'Take Quiz & Complete' : 'Mark as Complete & Continue'}
               </>
             )}
           </button>

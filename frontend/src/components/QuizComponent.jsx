@@ -13,9 +13,18 @@ export default function QuizComponent({ quiz, lesson, onComplete }) {
 
   let questions = [];
   try {
-    questions = typeof quiz === 'string' ? JSON.parse(quiz) : quiz;
+    // Quiz comes from API with questions as a JSON string
+    const questionsData = typeof quiz.questions === 'string'
+      ? JSON.parse(quiz.questions)
+      : quiz.questions;
+    questions = Array.isArray(questionsData) ? questionsData : [];
+
+    if (!questions.length) {
+      console.error('No questions found in quiz:', quiz);
+      return null;
+    }
   } catch (e) {
-    console.error('Error parsing quiz:', e);
+    console.error('Error parsing quiz questions:', e, quiz);
     return null;
   }
 
