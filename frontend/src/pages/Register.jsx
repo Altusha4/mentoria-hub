@@ -226,7 +226,7 @@ export default function Register({ setStudentId }) {
                       type="text"
                       value={formData.first_name}
                       onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
                       style={{ focus: 'none' }}
                       onFocus={(e) => e.target.style.borderColor = '#2195c4'}
                       onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -239,7 +239,7 @@ export default function Register({ setStudentId }) {
                       type="text"
                       value={formData.last_name}
                       onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
                       style={{ focus: 'none' }}
                       onFocus={(e) => e.target.style.borderColor = '#2195c4'}
                       onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -254,7 +254,7 @@ export default function Register({ setStudentId }) {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
                     style={{ focus: 'none' }}
                     onFocus={(e) => e.target.style.borderColor = '#2195c4'}
                     onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -267,7 +267,7 @@ export default function Register({ setStudentId }) {
                   <select
                     value={formData.grade}
                     onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none transition-colors text-gray-900 bg-white"
                     style={{ focus: 'none' }}
                     onFocus={(e) => e.target.style.borderColor = '#2195c4'}
                     onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
