@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Welcome from './pages/Welcome';
@@ -122,6 +123,7 @@ export default function App() {
       <BrowserRouter>
         <AppContent studentId={studentId} setStudentId={setStudentId} handleLogout={handleLogout} />
       </BrowserRouter>
+      <Toaster position="top-right" reverseOrder={false} />
     </ThemeProvider>
   );
 }

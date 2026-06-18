@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../utils/api';
+import { showToast } from '../utils/toast';
 
 export default function Login({ setStudentId }) {
   const navigate = useNavigate();
@@ -13,36 +14,32 @@ export default function Login({ setStudentId }) {
     e.preventDefault();
     setError('');
 
-    console.log('📝 [LOGIN] Form submitted');
-    console.log(`📝 [LOGIN] Email: ${email}`);
+    if (!email || !password) {
+      showToast.error('Email and password are required');
+      return;
+    }
 
     setLoading(true);
+    const loadingToast = showToast.loading('Signing in...');
 
     try {
-      console.log('📤 [LOGIN] Sending login request...');
       const response = await api.login(email, password);
 
-      console.log('✅ [LOGIN] Login successful!');
-      console.log('📥 [LOGIN] Response:', response);
-
-      // Save access token in memory (sessionStorage for security)
       sessionStorage.setItem('accessToken', response.access_token);
-
-      // Save user info (tokens are in httpOnly cookies)
       sessionStorage.setItem('studentId', response.student_id);
       sessionStorage.setItem('studentName', response.name);
 
-      console.log('💾 [LOGIN] Saved to sessionStorage');
-
-      // Set state
       setStudentId(response.student_id);
 
-      console.log('✅ [LOGIN] Redirecting to home...');
-      // Redirect to home
-      navigate('/');
+      showToast.dismiss(loadingToast);
+      showToast.success(`Welcome back, ${response.name}! 👋`);
+
+      setTimeout(() => navigate('/'), 1500);
     } catch (err) {
-      console.error('❌ [LOGIN] Error:', err);
-      setError('Login failed. Please check your email and password.');
+      showToast.dismiss(loadingToast);
+      const errorMsg = err.message || 'Login failed. Please check your credentials.';
+      showToast.error(errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

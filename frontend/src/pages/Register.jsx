@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../utils/api';
 import MathCaptcha from '../components/MathCaptcha';
+import { showToast } from '../utils/toast';
 
 export default function Register({ setStudentId }) {
   const navigate = useNavigate();
@@ -99,9 +100,13 @@ export default function Register({ setStudentId }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateStep(4)) return;
+    if (!validateStep(4)) {
+      showToast.error(error || 'Please fill in all required fields');
+      return;
+    }
 
     setLoading(true);
+    const loadingToast = showToast.loading('Creating your account...');
 
     try {
       const payload = {
@@ -134,10 +139,16 @@ export default function Register({ setStudentId }) {
       sessionStorage.setItem('studentInterests', formData.interests.join(', '));
 
       setStudentId(response.student_id);
-      navigate('/');
+
+      showToast.dismiss(loadingToast);
+      showToast.success(`Welcome, ${response.name}! 🎉`);
+
+      setTimeout(() => navigate('/'), 1500);
     } catch (err) {
-      console.error('Error:', err);
-      setError('Failed to create account. Email might already be registered.');
+      showToast.dismiss(loadingToast);
+      const errorMsg = err.message || 'Failed to create account. Email might already be registered.';
+      showToast.error(errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

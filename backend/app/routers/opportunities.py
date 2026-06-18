@@ -26,10 +26,14 @@ def list_opportunities(
     direction: Optional[str] = None,
     format: Optional[str] = None,
     grade_level: Optional[str] = None,
+    search: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 50,
     db: Session = Depends(get_db),
 ):
     query = db.query(Opportunity)
 
+    # Filters
     if category:
         query = query.filter(Opportunity.category == category)
     if direction:
@@ -39,7 +43,22 @@ def list_opportunities(
     if grade_level:
         query = query.filter(Opportunity.grade_level.contains(grade_level))
 
-    return query.order_by(Opportunity.deadline).all()
+    # Search
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Opportunity.title.ilike(search_term),
+                Opportunity.description.ilike(search_term),
+                Opportunity.tags.ilike(search_term)
+            )
+        )
+
+    # Pagination & Sort
+    total = query.count()
+    results = query.order_by(Opportunity.deadline).offset(skip).limit(limit).all()
+
+    return results
 
 @router.get("/{opportunity_id}", response_model=OpportunitySchema)
 def get_opportunity(opportunity_id: int, db: Session = Depends(get_db)):
