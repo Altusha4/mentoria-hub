@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { api } from '../utils/api';
 import { useTheme } from '../context/ThemeContext';
@@ -48,6 +48,7 @@ const CloseIcon = ({ className }) => (
 
 export default function Header({ studentId, setStudentId }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -76,15 +77,26 @@ export default function Header({ studentId, setStudentId }) {
     }
   };
 
-  const navLinkClass = `relative font-medium transition-colors duration-200 py-1
-    ${theme === 'dark'
-      ? 'text-gray-300 hover:text-white'
-      : 'text-gray-600 hover:text-gray-900'
-    }`;
+  const navLinks = [
+    { to: '/opportunities', label: 'Opportunities' },
+    { to: '/courses', label: 'Courses' },
+    { to: '/guardian', label: 'Guardian' },
+    { to: '/updates', label: 'Updates' },
+    { to: '/profile', label: 'Profile' },
+  ];
 
-  const navLinkActiveIndicator = `after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px]
-    after:bg-gradient-to-r after:from-[#3cc5e0] after:to-[#20c0a0]
-    after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-center`;
+  const getDesktopLinkClass = (path) => {
+    const isActive = location.pathname.startsWith(path);
+    const textClass = isActive
+      ? (theme === 'dark' ? 'text-white font-bold' : 'text-gray-900 font-bold')
+      : (theme === 'dark' ? 'text-gray-400 hover:text-white font-medium' : 'text-gray-500 hover:text-gray-900 font-medium');
+      
+    const indicatorClass = isActive
+      ? 'after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-[#3cc5e0] after:to-[#20c0a0] after:scale-x-100'
+      : 'after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-[#3cc5e0] after:to-[#20c0a0] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-center';
+      
+    return `relative transition-colors duration-200 py-1 ${textClass} ${indicatorClass}`;
+  };
 
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-xl border-b
@@ -113,21 +125,11 @@ export default function Header({ studentId, setStudentId }) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-7 flex-1 mx-10">
-            <Link to="/opportunities" className={`${navLinkClass} ${navLinkActiveIndicator}`}>
-              Opportunities
-            </Link>
-            <Link to="/courses" className={`${navLinkClass} ${navLinkActiveIndicator}`}>
-              Courses
-            </Link>
-            <Link to="/guardian" className={`${navLinkClass} ${navLinkActiveIndicator}`}>
-              Guardian
-            </Link>
-            <Link to="/updates" className={`${navLinkClass} ${navLinkActiveIndicator}`}>
-              Updates
-            </Link>
-            <Link to="/profile" className={`${navLinkClass} ${navLinkActiveIndicator}`}>
-              Profile
-            </Link>
+            {navLinks.map(({ to, label }) => (
+              <Link key={to} to={to} className={getDesktopLinkClass(to)}>
+                {label}
+              </Link>
+            ))}
           </nav>
 
           {/* Search Bar - Desktop */}
@@ -228,32 +230,31 @@ export default function Header({ studentId, setStudentId }) {
 
             {/* Mobile Navigation */}
             <div className="space-y-1 px-2">
-              {[
-                { to: '/opportunities', label: 'Opportunities' },
-                { to: '/courses', label: 'Courses' },
-                { to: '/guardian', label: 'Guardian' },
-                { to: '/updates', label: 'Updates' },
-                { to: '/profile', label: 'Profile' },
-              ].map(({ to, label }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`block px-4 py-2.5 rounded-xl font-medium text-sm transition-colors
-                    ${theme === 'dark'
-                      ? 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {label}
-                </Link>
-              ))}
+              {navLinks.map(({ to, label }) => {
+                const isActive = location.pathname.startsWith(to);
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={`block px-4 py-2.5 rounded-xl font-medium text-sm transition-colors
+                      ${isActive
+                        ? (theme === 'dark' ? 'bg-[#3cc5e0]/10 text-[#3cc5e0]' : 'bg-[#3cc5e0]/10 text-[#2195c4]')
+                        : (theme === 'dark'
+                          ? 'text-gray-300 hover:text-white hover:bg-white/[0.06]'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50')
+                      }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
               <button
                 onClick={() => {
                   handleLogout();
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors
+                className={`w-full text-left px-4 py-2.5 rounded-xl font-medium text-sm transition-colors mt-2
                   ${theme === 'dark'
                     ? 'text-red-400 hover:bg-red-500/[0.1]'
                     : 'text-red-600 hover:bg-red-50'

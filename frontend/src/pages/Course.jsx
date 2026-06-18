@@ -1,121 +1,247 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { api } from '../utils/api';
+import { useTheme } from '../context/ThemeContext';
+
+/* ── Difficulty config ───────────────────── */
+const DIFF = {
+  beginner:     { label: 'Beginner',     color: '#20c0a0', bg: 'rgba(32,192,160,0.1)'  },
+  intermediate: { label: 'Intermediate', color: '#3cc5e0', bg: 'rgba(60,197,224,0.1)'  },
+  advanced:     { label: 'Advanced',     color: '#a855f7', bg: 'rgba(168,85,247,0.1)'  },
+};
+function getDiff(level) {
+  if (!level) return DIFF.beginner;
+  const k = Object.keys(DIFF).find(k => level.toLowerCase().includes(k));
+  return k ? DIFF[k] : DIFF.beginner;
+}
 
 export default function Course({ studentId }) {
   const { id } = useParams();
+  const { theme } = useTheme();
   const [course, setCourse] = useState(null);
   const [enrolled, setEnrolled] = useState(false);
+  const [enrolling, setEnrolling] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchCourse();
-  }, [id]);
+  useEffect(() => { fetchCourse(); }, [id]);
 
   const fetchCourse = async () => {
     setLoading(true);
     try {
       const data = await api.getCourse(id);
       setCourse(data);
-    } catch (error) {
-      console.error('Error fetching course:', error);
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
   };
 
   const handleEnroll = async () => {
-    if (!studentId) {
-      alert('Please login first');
-      return;
-    }
-
+    if (!studentId || enrolling) return;
+    setEnrolling(true);
     try {
       await api.enrollCourse(id, studentId);
       setEnrolled(true);
-      alert('Successfully enrolled in course!');
-    } catch (error) {
-      console.error('Error enrolling:', error);
-      alert('Failed to enroll');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEnrolling(false);
     }
   };
 
+  /* ── Loading ── */
   if (loading) {
-    return <div className="text-center py-12">Loading course...</div>;
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#060d18]' : 'bg-gray-50'}`}>
+        <div className="text-center">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center"
+            style={{ background: 'rgba(60,197,224,0.08)' }}>
+            <div className="w-7 h-7 border-2 border-[#3cc5e0] border-t-transparent rounded-full animate-spin" />
+          </div>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>Loading course…</p>
+        </div>
+      </div>
+    );
   }
 
   if (!course) {
-    return <div className="text-center py-12">Course not found</div>;
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-[#060d18]' : 'bg-gray-50'}`}>
+        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Course not found.</p>
+      </div>
+    );
   }
 
+  const diff = getDiff(course.difficulty_level);
+  const lessonCount = course.lessons?.length || 0;
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Course Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-8 rounded-lg mb-8">
-        <h1 className="text-4xl font-bold mb-4">{course.title}</h1>
-        <p className="text-lg text-blue-100 mb-6">{course.description}</p>
-        <div className="flex items-center justify-between">
-          <div className="text-sm">
-            <p className="text-blue-100">Difficulty Level</p>
-            <p className="font-semibold text-lg">{course.difficulty_level}</p>
+    <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-[#060d18]' : 'bg-gray-50'}`}>
+
+      {/* ═════ HERO ═════════════════════════════ */}
+      <div className="relative overflow-hidden" style={{
+        background: theme === 'dark'
+          ? 'linear-gradient(135deg, #0a1628 0%, #001a35 40%, #0f1f2e 100%)'
+          : 'linear-gradient(135deg, #0c1e3a 0%, #0d2847 50%, #0f1f2e 100%)'
+      }}>
+        {/* Glow */}
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-3xl opacity-10 pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${diff.color}, transparent 70%)` }} />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+          {/* Back */}
+          <Link to="/courses" className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium mb-8">
+            ← Courses
+          </Link>
+
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div className="flex-1 min-w-0">
+              {/* Difficulty */}
+              <span className="inline-block px-3 py-1 rounded-lg text-xs font-bold mb-4"
+                style={{ color: diff.color, background: diff.bg }}>
+                {diff.label}
+              </span>
+
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight mb-3">
+                {course.title}
+              </h1>
+
+              {course.description && (
+                <p className="text-slate-400 text-base leading-relaxed max-w-xl">
+                  {course.description}
+                </p>
+              )}
+
+              {/* Stats pills */}
+              <div className="flex flex-wrap gap-2 mt-5">
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full
+                  ${theme === 'dark' ? 'bg-white/[0.06] text-gray-300' : 'bg-white/20 text-white'}`}>
+                  {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+                </span>
+                {course.difficulty_level && (
+                  <span className={`text-xs font-semibold px-3 py-1.5 rounded-full capitalize
+                    ${theme === 'dark' ? 'bg-white/[0.06] text-gray-300' : 'bg-white/20 text-white'}`}>
+                    {course.difficulty_level}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Enroll button */}
+            {!enrolled ? (
+              <button
+                onClick={handleEnroll}
+                disabled={enrolling}
+                className="flex-shrink-0 px-7 py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02] disabled:opacity-60"
+                style={{ background: `linear-gradient(135deg, ${diff.color}, #2195c4)` }}
+              >
+                {enrolling ? 'Enrolling…' : 'Enroll Now'}
+              </button>
+            ) : (
+              <div className="flex-shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl"
+                style={{ background: 'rgba(32,192,160,0.12)', border: '1px solid rgba(32,192,160,0.3)' }}>
+                <span className="text-[#20c0a0] text-base">✓</span>
+                <span className="text-sm font-bold text-[#20c0a0]">Enrolled</span>
+              </div>
+            )}
           </div>
-          {!enrolled && (
-            <button
-              onClick={handleEnroll}
-              className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
-            >
-              Enroll Now
-            </button>
+        </div>
+
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none"
+          style={{ background: theme === 'dark' ? 'linear-gradient(to bottom, transparent, #060d18)' : 'linear-gradient(to bottom, transparent, #f9fafb)' }} />
+      </div>
+
+      {/* ═════ CONTENT ══════════════════════════ */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Lesson list */}
+        <div className={`rounded-2xl overflow-hidden border ${theme === 'dark' ? 'bg-white/[0.02] border-white/[0.06]' : 'bg-white border-gray-100 shadow-sm'}`}>
+
+          {/* Header */}
+          <div className={`flex items-center justify-between px-7 py-5 border-b
+            ${theme === 'dark' ? 'border-white/[0.06]' : 'border-gray-100'}`}>
+            <div>
+              <h2 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Course Content
+              </h2>
+              <p className={`text-xs mt-0.5 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+              </p>
+            </div>
+            <div className="w-1 h-5 rounded-full" style={{ background: diff.color }} />
+          </div>
+
+          {/* Lessons */}
+          {lessonCount > 0 ? (
+            <div className="divide-y" style={{ borderColor: theme === 'dark' ? 'rgba(255,255,255,0.04)' : '#f3f4f6' }}>
+              {course.lessons.map((lesson, index) => (
+                <Link
+                  key={lesson.id}
+                  to={`/courses/${course.id}/lesson/${lesson.id}`}
+                  className={`group flex items-center gap-5 px-7 py-5 transition-all duration-200
+                    ${theme === 'dark'
+                      ? 'hover:bg-white/[0.04]'
+                      : 'hover:bg-gray-50'
+                    }`}
+                >
+                  {/* Number bubble */}
+                  <div
+                    className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black transition-all duration-200 group-hover:scale-105"
+                    style={{ background: diff.bg, color: diff.color }}
+                  >
+                    {index + 1}
+                  </div>
+
+                  {/* Text */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className={`font-semibold text-sm leading-snug transition-colors duration-200
+                      ${theme === 'dark'
+                        ? 'text-gray-200 group-hover:text-white'
+                        : 'text-gray-800 group-hover:text-gray-900'
+                      }`}>
+                      {lesson.title}
+                    </h3>
+                    {lesson.content && (
+                      <p className={`text-xs mt-1 line-clamp-1 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>
+                        {lesson.content}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Duration if exists */}
+                  {lesson.duration && (
+                    <span className={`text-xs font-medium flex-shrink-0 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>
+                      {lesson.duration} min
+                    </span>
+                  )}
+
+                  {/* Arrow */}
+                  <svg
+                    viewBox="0 0 20 20" fill="currentColor"
+                    className={`w-4 h-4 flex-shrink-0 transition-all duration-200 group-hover:translate-x-0.5
+                      ${theme === 'dark' ? 'text-gray-700 group-hover:text-[#3cc5e0]' : 'text-gray-300 group-hover:text-[#2195c4]'}`}
+                  >
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className={`px-8 py-16 text-center`}>
+              <div className="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center"
+                style={{ background: diff.bg }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7" style={{ color: diff.color }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <p className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                No lessons available yet
+              </p>
+            </div>
           )}
         </div>
-      </div>
-
-      {/* Lessons */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="bg-gray-50 px-8 py-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Course Content</h2>
-          <p className="text-gray-600">({course.lessons?.length || 0} lessons)</p>
-        </div>
-
-        {course.lessons && course.lessons.length > 0 ? (
-          <div className="divide-y divide-gray-200">
-            {course.lessons.map((lesson, index) => (
-              <Link
-                key={lesson.id}
-                to={`/courses/${course.id}/lesson/${lesson.id}`}
-                className="block px-8 py-6 hover:bg-blue-50 transition-colors"
-              >
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                    <span className="font-semibold text-blue-600">{index + 1}</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">{lesson.title}</h3>
-                    <p className="text-gray-600 text-sm line-clamp-1">{lesson.content}</p>
-                  </div>
-                  <div className="ml-4">
-                    <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="px-8 py-12 text-center">
-            <p className="text-gray-500">No lessons available yet</p>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-8">
-        <Link
-          to="/courses"
-          className="inline-block px-4 py-2 text-blue-600 hover:text-blue-700 font-medium"
-        >
-          ← Back to Courses
-        </Link>
       </div>
     </div>
   );
