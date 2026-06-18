@@ -8,7 +8,7 @@ import Opportunities from './pages/Opportunities';
 import Courses from './pages/Courses';
 import Course from './pages/Course';
 import Lesson from './pages/Lesson';
-import ProfileNew from './pages/ProfileNew';
+import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Search from './pages/Search';
@@ -65,7 +65,7 @@ function AppContent({ studentId, setStudentId, handleLogout }) {
           />
           <Route
             path="/profile"
-            element={studentId ? <ProfileNew studentId={studentId} /> : <Navigate to="/login" />}
+            element={studentId ? <Profile studentId={studentId} /> : <Navigate to="/login" />}
           />
           <Route
             path="/search"
