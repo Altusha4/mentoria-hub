@@ -13,8 +13,8 @@ from ..readiness_calculator import calculate_readiness
 from ..email_service import send_mission_report, is_configured as email_configured
 from ..telegram_service import (
     is_configured as telegram_configured,
-    get_pending_commands,
     send_telegram_message,
+    get_pending_commands,
     format_coach_today,
     format_coach_deadlines,
     format_coach_watchlist,

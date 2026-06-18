@@ -414,7 +414,15 @@ export default function Guardian({ studentId }) {
     }
   }, [studentId]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { 
+    load(); 
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      load();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [load]);
+  
   useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   const handleStageChange = async (opportunityId, stage) => {

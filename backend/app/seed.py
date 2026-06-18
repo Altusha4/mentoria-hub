@@ -195,54 +195,55 @@ def seed_data():
         db.add(opportunity)
     db.commit()
 
-    # Create sample courses
     courses = [
         Course(
             title="English for Academic Success",
             description="Master academic English writing, presentation, and communication skills.",
             difficulty_level="intermediate",
             tags="English,Academic,Language",
+            image_url="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop",
         ),
         Course(
             title="Python Programming Fundamentals",
             description="Learn Python from basics to advanced OOP concepts.",
             difficulty_level="beginner",
             tags="Programming,Python,Coding",
+            image_url="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop",
         ),
         Course(
             title="Business Strategy & Leadership",
             description="Develop leadership and strategic thinking skills for business.",
             difficulty_level="intermediate",
             tags="Business,Leadership,Strategy",
+            image_url="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop",
         ),
     ]
     for course in courses:
         db.add(course)
     db.commit()
 
-    # Create lessons for courses
     lessons_data = [
         {
             "course_title": "English for Academic Success",
             "lessons": [
-                ("Essay Writing Basics", "Learn the fundamentals of academic essay writing.", "https://www.youtube.com/watch?v=essay1", 1),
-                ("Advanced Vocabulary", "Expand your academic vocabulary with common phrases.", "https://www.youtube.com/watch?v=vocab1", 2),
-                ("Public Speaking for Presentations", "Master presentation skills and overcome stage fright.", "https://www.youtube.com/watch?v=speaking1", 3),
+                ("Essay Writing Basics", "Learn the fundamentals of academic essay writing.", "https://www.youtube.com/watch?v=R1vskiVDwl4", 1),
+                ("Advanced Vocabulary", "Expand your academic vocabulary with common phrases.", "https://www.youtube.com/watch?v=Ks-_Mh1QhMc", 2),
+                ("Public Speaking for Presentations", "Master presentation skills and overcome stage fright.", "https://www.youtube.com/watch?v=i5mYphUoOCs", 3),
             ],
         },
         {
             "course_title": "Python Programming Fundamentals",
             "lessons": [
-                ("Introduction to Python", "Get started with Python syntax and environment setup.", "https://www.youtube.com/watch?v=python1", 1),
-                ("Variables & Data Types", "Understand variables, data types, and operations.", "https://www.youtube.com/watch?v=python2", 2),
-                ("Control Flow & Functions", "Master loops, conditionals, and functions.", "https://www.youtube.com/watch?v=python3", 3),
+                ("Introduction to Python", "Get started with Python syntax and environment setup.", "https://www.youtube.com/watch?v=kqtD5dpn9C8", 1),
+                ("Variables & Data Types", "Understand variables, data types, and operations.", "https://www.youtube.com/watch?v=_uQrJ0TkZlc", 2),
+                ("Control Flow & Functions", "Master loops, conditionals, and functions.", "https://www.youtube.com/watch?v=9Os0o3wzS_I", 3),
             ],
         },
         {
             "course_title": "Business Strategy & Leadership",
             "lessons": [
-                ("Leadership Fundamentals", "Core concepts of effective leadership.", "https://www.youtube.com/watch?v=leadership1", 1),
-                ("Strategic Planning", "Learn how to develop and execute business strategies.", "https://www.youtube.com/watch?v=strategy1", 2),
+                ("Leadership Fundamentals", "Core concepts of effective leadership.", "https://www.youtube.com/watch?v=qp0HIF3SfI4", 1),
+                ("Strategic Planning", "Learn how to develop and execute business strategies.", "https://www.youtube.com/watch?v=iuYlGRnC7J8", 2),
             ],
         },
     ]

@@ -96,17 +96,21 @@ export default function CourseCard({ course, enrolled = false, progress = 0 }) {
       }`}
     >
       {/* ═══ Card Header — Visual Area ═══ */}
-      <div className="relative h-44 overflow-hidden" style={{ background: config.gradient }}>
+      <div className="relative h-44 overflow-hidden" style={course.image_url ? { backgroundImage: `url(${course.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: config.gradient }}>
+        {course.image_url && <div className="absolute inset-0 bg-black/40" />}
+        
         {/* Decorative shapes */}
-        <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/[0.08]" />
-        <div className="absolute -bottom-10 -left-6 w-40 h-40 rounded-full bg-white/[0.05]" />
-        <div className="absolute top-1/2 right-1/4 w-20 h-20 rounded-full bg-white/[0.04]" />
-
-        {/* Pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
-          backgroundSize: '20px 20px'
-        }} />
+        {!course.image_url && (
+          <>
+            <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/[0.08]" />
+            <div className="absolute -bottom-10 -left-6 w-40 h-40 rounded-full bg-white/[0.05]" />
+            <div className="absolute top-1/2 right-1/4 w-20 h-20 rounded-full bg-white/[0.04]" />
+            <div className="absolute inset-0 opacity-[0.03]" style={{
+              backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+              backgroundSize: '20px 20px'
+            }} />
+          </>
+        )}
 
         {/* Content */}
         <div className="relative z-10 h-full flex flex-col justify-between p-6">

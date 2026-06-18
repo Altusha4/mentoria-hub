@@ -74,6 +74,19 @@ def register(student: StudentProfileCreate, response: Response, db: Session = De
 
     print(f"✅ [REGISTER] Student created! ID: {db_student.id}, Email: {db_student.email}")
 
+    # Auto-enroll in a default course and track a default opportunity to populate the Guardian dashboard
+    from ..models import Enrollment, OpportunityJourney, Course, Opportunity, SavedOpportunity
+    first_course = db.query(Course).first()
+    if first_course:
+        db.add(Enrollment(student_id=db_student.id, course_id=first_course.id))
+    
+    first_opp = db.query(Opportunity).first()
+    if first_opp:
+        db.add(SavedOpportunity(student_id=db_student.id, opportunity_id=first_opp.id))
+        db.add(OpportunityJourney(student_id=db_student.id, opportunity_id=first_opp.id, stage="discovered", readiness_score=30.0))
+        
+    db.commit()
+
     # Generate tokens
     access_token = create_access_token(data={"sub": db_student.id})
     refresh_token = create_refresh_token(data={"sub": db_student.id})

@@ -29,6 +29,7 @@ class CourseBase(BaseModel):
     title: str
     description: str
     difficulty_level: str
+    image_url: Optional[str] = None
     tags: Optional[str] = None
 
 class CourseCreate(CourseBase):
@@ -87,7 +88,9 @@ class StudentProfileBase(BaseModel):
     skills: Optional[str] = None
     # Documents
     cv_text: Optional[str] = None
+    cv_video_url: Optional[str] = None
     motivation_letter: Optional[str] = None
+    transcript_url: Optional[str] = None
 
 class StudentProfileCreate(StudentProfileBase):
     password: str  # Пароль в открытом виде (будет захеширован на бэке)
@@ -110,7 +113,9 @@ class StudentProfileUpdate(BaseModel):
     certificates: Optional[str] = None
     skills: Optional[str] = None
     cv_text: Optional[str] = None
+    cv_video_url: Optional[str] = None
     motivation_letter: Optional[str] = None
+    transcript_url: Optional[str] = None
 
 class StudentProfile(StudentProfileBase):
     id: int
@@ -155,6 +160,23 @@ class TelegramPost(TelegramPostBase):
     id: int
     posted_at: datetime
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CommentBase(BaseModel):
+    text: str
+
+class CommentCreate(CommentBase):
+    pass
+
+class CommentResponse(CommentBase):
+    id: int
+    lesson_id: int
+    student_id: int
+    created_at: datetime
+    # We include basic student info so the frontend can display who commented
+    student: Optional[StudentProfile] = None
 
     class Config:
         from_attributes = True

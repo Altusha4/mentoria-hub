@@ -419,11 +419,14 @@ def poll_telegram_connection(student_id: int, db: Session = Depends(get_db)):
     if not telegram_configured():
         return {"connected": False}
 
-    updates = get_recent_updates(50)
+    from ..telegram_service import get_pending_commands
+    updates = get_pending_commands()
     for update in updates:
         msg = update.get("message", {})
         text = msg.get("text", "")
         chat_id = str(msg.get("chat", {}).get("id", ""))
+        
+        # In telegram, /start with a payload looks like "/start 3"
         if chat_id and (text == f"/start {student_id}" or text.startswith(f"/start {student_id} ")):
             prefs.telegram_chat_id = chat_id
             prefs.telegram_enabled = True

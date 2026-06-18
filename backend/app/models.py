@@ -38,7 +38,9 @@ class StudentProfile(Base):
 
     # Documents
     cv_text = Column(Text, nullable=True)  # CV в текстовом формате
+    cv_video_url = Column(String, nullable=True)  # Видео CV
     motivation_letter = Column(Text, nullable=True)  # Мотивационное письмо
+    transcript_url = Column(String, nullable=True)  # Транскрипт
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -49,6 +51,7 @@ class StudentProfile(Base):
     notification_preference = relationship("NotificationPreference", back_populates="student", uselist=False)
     notification_logs = relationship("NotificationLog", back_populates="student")
     opportunity_journeys = relationship("OpportunityJourney", back_populates="student")
+    comments = relationship("Comment", back_populates="student", cascade="all, delete-orphan")
 
 class Opportunity(Base):
     __tablename__ = "opportunity"
@@ -89,6 +92,7 @@ class Course(Base):
     description = Column(Text)
     difficulty_level = Column(String)  # e.g., "beginner", "intermediate", "advanced"
     tags = Column(String)  # JSON или CSV
+    image_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     lessons = relationship("Lesson", back_populates="course", cascade="all, delete-orphan")
@@ -108,6 +112,7 @@ class Lesson(Base):
     course = relationship("Course", back_populates="lessons")
     progress = relationship("LessonProgress", back_populates="lesson", cascade="all, delete-orphan")
     quiz = relationship("Quiz", back_populates="lesson", uselist=False, cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="lesson", cascade="all, delete-orphan")
 
 class Quiz(Base):
     __tablename__ = "quiz"
@@ -206,3 +211,15 @@ class OpportunityJourney(Base):
 
     student = relationship("StudentProfile", back_populates="opportunity_journeys")
     opportunity = relationship("Opportunity", back_populates="journeys")
+
+class Comment(Base):
+    __tablename__ = "comment"
+
+    id = Column(Integer, primary_key=True, index=True)
+    lesson_id = Column(Integer, ForeignKey("lesson.id"))
+    student_id = Column(Integer, ForeignKey("student_profile.id"))
+    text = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    lesson = relationship("Lesson", back_populates="comments")
+    student = relationship("StudentProfile", back_populates="comments")

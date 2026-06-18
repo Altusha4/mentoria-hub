@@ -212,7 +212,19 @@ export default function Profile({ studentId }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await api.updateStudent(studentId, formData);
+      const allowedFields = [
+        'email', 'first_name', 'last_name', 'grade', 'interests', 'subjects', 'goals', 'bio',
+        'gpa', 'ielts_score', 'toefl_score', 'sat_score', 'activities', 'certificates', 'skills',
+        'cv_text', 'cv_video_url', 'motivation_letter', 'transcript_url'
+      ];
+      const payload = {};
+      allowedFields.forEach(field => {
+        if (formData[field] !== undefined) {
+          payload[field] = formData[field];
+        }
+      });
+
+      await api.updateStudent(studentId, payload);
       setProfile(formData);
       setEditing(false);
       setSaved(true);

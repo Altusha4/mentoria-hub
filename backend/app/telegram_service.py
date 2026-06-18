@@ -34,7 +34,7 @@ def _telegram_api_call(method: str, params: dict) -> dict:
         url = f"{url}?{query_string}"
 
     try:
-        with urllib.request.urlopen(url, timeout=10, context=_ssl_ctx()) as resp:
+        with urllib.request.urlopen(url, timeout=15, context=_ssl_ctx()) as resp:
             return json.loads(resp.read())
     except Exception as e:
         print(f"❌ Telegram API error: {e}")
@@ -184,3 +184,85 @@ def get_bot_username() -> Optional[str]:
 def get_recent_updates(limit: int = 5) -> List[dict]:
     """Получить последние обновления из канала"""
     return get_recent_posts("-1004422220327", limit)
+
+def get_pending_commands() -> List[dict]:
+    """Получает входящие сообщения боту"""
+    print("🤖 Checking bot messages...")
+    result = _telegram_api_call("getUpdates", {"timeout": 10, "allowed_updates": ["message"]})
+    if not result.get("ok"):
+        return []
+    
+    updates = result.get("result", [])
+    if updates:
+        highest_id = max(u["update_id"] for u in updates)
+        # Подтверждаем получение обновлений, сдвигая offset
+        _telegram_api_call("getUpdates", {"offset": highest_id + 1, "limit": 1})
+    
+    return updates
+
+def format_coach_today(name: str, missions: list, score: int) -> str:
+    msg = f"🌅 <b>Good morning, {name}!</b>\nYour Guardian Score: <b>{score}</b>\n\n"
+    if not missions:
+        msg += "You have no urgent tasks today. Keep exploring!"
+    else:
+        msg += "<b>Today's Missions:</b>\n"
+        for m in missions:
+            msg += f"{m.get('icon', '🔹')} <b>{m['title']}</b>\n   {m['action']}\n"
+    return msg
+
+def format_coach_deadlines(name: str, watchlist: list) -> str:
+    urgent = [w for w in watchlist if w['days_left'] is not None and w['days_left'] <= 7]
+    if not urgent:
+        return f"📅 <b>{name}</b>, you have no upcoming deadlines in the next 7 days. Stay ahead of the game!"
+    
+    msg = "⏰ <b>Upcoming Deadlines:</b>\n\n"
+    for w in sorted(urgent, key=lambda x: x['days_left']):
+        days = w['days_left']
+        alert = "🔴 TODAY" if days == 0 else "🟠 TOMORROW" if days == 1 else f"🟡 In {days} days"
+        msg += f"• <b>{w['title']}</b>\n  {alert} — Readiness: {w['readiness_score']}%\n"
+    return msg
+
+def format_coach_watchlist(name: str, watchlist: list) -> str:
+    if not watchlist:
+        return "👀 Your watchlist is empty. Explore Mentoria Hub to find opportunities!"
+    
+    msg = f"📋 <b>Your Watchlist ({len(watchlist)} items):</b>\n\n"
+    for w in watchlist[:5]:
+        msg += f"• <b>{w['title']}</b> - {w.get('stage', 'discovered').capitalize()}\n"
+    if len(watchlist) > 5:
+        msg += f"\n<i>...and {len(watchlist) - 5} more.</i>"
+    return msg
+
+def format_coach_score(name: str, score: int, risk: str) -> str:
+    status = "🌟 Excellent" if score >= 80 else "📈 On Track" if score >= 60 else "⚠️ Needs Attention"
+    return f"🛡️ <b>Guardian Score</b>\n\n<b>{name}</b>, your current score is <b>{score}/100</b> ({status}).\n\nKeep completing lessons and preparing for your opportunities to boost your score!"
+
+def format_coach_courses(name: str, courses: list, pending: int) -> str:
+    if not courses:
+        return "📚 You are not enrolled in any courses yet."
+    msg = f"📚 <b>Your Courses:</b>\n\n"
+    for c in courses:
+        msg += f"• <b>{c['title']}</b> - {c['progress']:.0f}% done\n"
+    msg += f"\nYou have <b>{pending} pending lessons</b>."
+    return msg
+
+def format_coach_guardian(name: str, data: dict) -> str:
+    return (
+        f"🛡️ <b>Guardian Status for {name}</b>\n\n"
+        f"📊 Score: <b>{data['guardian_score']}</b>\n"
+        f"🎯 Tracked: <b>{len(data['watchlist'])}</b>\n"
+        f"📚 Courses: <b>{len(data['course_progress'])}</b>\n\n"
+        f"Type /today for your daily mission!"
+    )
+
+def format_coach_help() -> str:
+    return (
+        "🤖 <b>Mentoria Coach Bot Commands:</b>\n\n"
+        "/today - Daily missions\n"
+        "/deadlines - Upcoming deadlines\n"
+        "/watchlist - Your tracked items\n"
+        "/score - Your Guardian score\n"
+        "/courses - Your learning progress\n"
+        "/guardian - Quick overview\n"
+        "/help - Show this message"
+    )
