@@ -34,6 +34,17 @@ class CourseBase(BaseModel):
 class CourseCreate(CourseBase):
     pass
 
+class QuizBase(BaseModel):
+    title: str
+    questions: str  # JSON string
+
+class Quiz(QuizBase):
+    id: int
+    lesson_id: int
+
+    class Config:
+        from_attributes = True
+
 class LessonBase(BaseModel):
     title: str
     content: str
@@ -43,6 +54,7 @@ class LessonBase(BaseModel):
 class Lesson(LessonBase):
     id: int
     course_id: int
+    quiz: Optional[Quiz] = None
 
     class Config:
         from_attributes = True

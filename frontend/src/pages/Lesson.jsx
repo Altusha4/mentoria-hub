@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../utils/api';
 import { useTheme } from '../context/ThemeContext';
+import QuizComponent from '../components/QuizComponent';
+import { showToast } from '../utils/toast';
 
 /* ── Feedback options ────────────────────── */
 const FEEDBACK_OPTIONS = ['Very helpful', 'Helpful', 'Somewhat helpful', 'Not helpful'];
@@ -18,6 +20,7 @@ export default function Lesson({ studentId }) {
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState('');
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
 
   useEffect(() => { fetchData(); }, [lessonId, courseId, studentId]);
 
@@ -39,15 +42,37 @@ export default function Lesson({ studentId }) {
 
   const handleComplete = async () => {
     if (!studentId || completing) return;
+
+    // Show quiz first if exists and not submitted
+    if (lesson?.quiz && !quizSubmitted) {
+      setShowQuiz(true);
+      return;
+    }
+
     setCompleting(true);
     try {
       await api.completeLesson(lessonId, studentId);
       setCompleted(true);
+      showToast.success('Lesson completed! 🎉');
+
+      // Go to next lesson or back to course
+      const nextLesson = lessons[currentIdx + 1];
+      if (nextLesson) {
+        navigate(`/course/${courseId}/lesson/${nextLesson.id}`);
+      } else {
+        setTimeout(() => navigate(`/course/${courseId}`), 1500);
+      }
     } catch (e) {
       console.error(e);
+      showToast.error('Failed to complete lesson');
     } finally {
       setCompleting(false);
     }
+  };
+
+  const handleQuizComplete = async () => {
+    setQuizSubmitted(true);
+    await handleComplete();
   };
 
   const handleSubmitQuiz = () => {
@@ -266,8 +291,19 @@ export default function Lesson({ studentId }) {
           </div>
         </div>
 
+        {/* ═════ QUIZ ═════════════════════════════ */}
+        {showQuiz && lesson?.quiz && (
+          <div className="mb-8">
+            <QuizComponent
+              quiz={lesson.quiz}
+              lesson={lesson}
+              onComplete={handleQuizComplete}
+            />
+          </div>
+        )}
+
         {/* ═════ COMPLETE BUTTON ══════════════════ */}
-        {!completed ? (
+        {!completed && !showQuiz ? (
           <button
             onClick={handleComplete}
             disabled={completing}
