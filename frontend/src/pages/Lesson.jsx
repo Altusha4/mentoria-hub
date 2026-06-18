@@ -22,6 +22,12 @@ export default function Lesson({ studentId }) {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
 
+  /* ── Next/Prev lesson (computed early) ── */
+  const lessons = course?.lessons || [];
+  const currentIdx = lessons.findIndex(l => l.id === parseInt(lessonId));
+  const prevLesson = currentIdx > 0 ? lessons[currentIdx - 1] : null;
+  const nextLesson = currentIdx >= 0 && currentIdx < lessons.length - 1 ? lessons[currentIdx + 1] : null;
+
   useEffect(() => { fetchData(); }, [lessonId, courseId, studentId]);
 
   const fetchData = async () => {
@@ -55,13 +61,8 @@ export default function Lesson({ studentId }) {
       setCompleted(true);
       showToast.success('Lesson completed! 🎉');
 
-      // Go to next lesson or back to course
-      const nextLesson = lessons[currentIdx + 1];
-      if (nextLesson) {
-        navigate(`/course/${courseId}/lesson/${nextLesson.id}`);
-      } else {
-        setTimeout(() => navigate(`/course/${courseId}`), 1500);
-      }
+      // Navigate to next lesson
+      setTimeout(() => handleNextNavigation(), 1500);
     } catch (e) {
       console.error(e);
       showToast.error('Failed to complete lesson');
@@ -72,19 +73,28 @@ export default function Lesson({ studentId }) {
 
   const handleQuizComplete = async () => {
     setQuizSubmitted(true);
-    await handleComplete();
+    if (!studentId || completing) return;
+
+    setCompleting(true);
+    try {
+      await api.completeLesson(lessonId, studentId);
+      setCompleted(true);
+      showToast.success('Lesson completed! 🎉');
+
+      // Navigate to next lesson
+      setTimeout(() => handleNextNavigation(), 1500);
+    } catch (e) {
+      console.error(e);
+      showToast.error('Failed to complete lesson');
+    } finally {
+      setCompleting(false);
+    }
   };
 
   const handleSubmitQuiz = () => {
     if (!feedback) return;
     setQuizSubmitted(true);
   };
-
-  /* ── Next/Prev lesson ── */
-  const lessons = course?.lessons || [];
-  const currentIdx = lessons.findIndex(l => l.id === parseInt(lessonId));
-  const prevLesson = currentIdx > 0 ? lessons[currentIdx - 1] : null;
-  const nextLesson = currentIdx >= 0 && currentIdx < lessons.length - 1 ? lessons[currentIdx + 1] : null;
 
   /* ── Loading ── */
   if (loading) {
@@ -114,7 +124,13 @@ export default function Lesson({ studentId }) {
     );
   }
 
-  const lessonNum = currentIdx >= 0 ? currentIdx + 1 : null;
+  const lessonNum = currentIdx >= 0 ? currentIdx + 1 : null; const handleNextNavigation = () => {
+    if (nextLesson) {
+      navigate(`/course/${courseId}/lesson/${nextLesson.id}`);
+    } else {
+      navigate(`/course/${courseId}`);
+    }
+  };
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-[#060d18]' : 'bg-gray-50'}`}>
