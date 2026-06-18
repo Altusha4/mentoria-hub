@@ -220,7 +220,7 @@ export default function Lesson({ studentId }) {
                 <p className={`text-sm font-semibold mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   How did you find this lesson?
                 </p>
-                <div className="grid grid-cols-2 gap-2 mb-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-5">
                   {FEEDBACK_OPTIONS.map(opt => (
                     <button
                       key={opt}
@@ -299,7 +299,7 @@ export default function Lesson({ studentId }) {
         )}
 
         {/* ═════ PREV / NEXT NAVIGATION ═══════════ */}
-        <div className={`grid gap-3 ${prevLesson && nextLesson ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <div className={`grid gap-3 ${prevLesson && nextLesson ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
           {prevLesson && (
             <Link
               to={`/courses/${courseId}/lesson/${prevLesson.id}`}
