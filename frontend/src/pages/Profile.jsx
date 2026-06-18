@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 import { useTheme } from '../context/ThemeContext';
 
@@ -165,6 +166,8 @@ const TABS = [
   { id: 'academics',  label: 'Academics',  color: '#20c0a0' },
   { id: 'activities', label: 'Activities', color: '#a855f7' },
   { id: 'documents',  label: 'Documents',  color: '#f97316' },
+  { id: 'saved',      label: 'Saved',      color: '#e23670' },
+  { id: 'courses',    label: 'My Courses', color: '#6366f1' },
 ];
 
 /* ═══════════════════════════════════════════
@@ -179,6 +182,8 @@ export default function Profile({ studentId }) {
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [formData, setFormData] = useState({});
+  const [savedOpps, setSavedOpps] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
   const stickyRef = useRef(null);
 
   useEffect(() => {
@@ -190,6 +195,13 @@ export default function Profile({ studentId }) {
       const data = await api.getStudent(studentId);
       setProfile(data);
       setFormData(data);
+
+      const [savedResp, coursesResp] = await Promise.all([
+        api.getSavedOpportunities(studentId).catch(() => []),
+        api.getEnrolledCourses(studentId).catch(() => [])
+      ]);
+      setSavedOpps(savedResp);
+      setEnrolledCourses(coursesResp);
     } catch (e) {
       console.error(e);
     } finally {
@@ -690,6 +702,98 @@ export default function Profile({ studentId }) {
               )}
             </SectionCard>
           </>
+        )}
+
+        {/* ══════ TAB: SAVED OPPORTUNITIES ════════ */}
+        {activeTab === 'saved' && (
+          <SectionCard theme={theme} accentColor="#e23670">
+            <SectionTitle label="Saved Opportunities" theme={theme} color="#e23670" />
+            {savedOpps.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {savedOpps.map(item => {
+                  const opp = item.opportunity;
+                  return (
+                    <Link key={item.id} to={`/opportunities/${opp.id}`}
+                      className={`block p-5 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-md
+                        ${theme === 'dark' 
+                          ? 'bg-white/[0.02] border-white/[0.06] hover:border-[#e23670]/40' 
+                          : 'bg-white border-gray-100 hover:border-[#e23670]/40'
+                        }`}
+                    >
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#e23670] mb-1 block">
+                        {opp.category || 'Opportunity'}
+                      </span>
+                      <h4 className={`font-bold text-sm mb-2 line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {opp.title}
+                      </h4>
+                      {opp.format && (
+                        <span className={`inline-block px-2 py-1 rounded text-xs font-semibold
+                          ${theme === 'dark' ? 'bg-white/[0.06] text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                          {opp.format}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className={`text-sm italic ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>
+                You haven't saved any opportunities yet.
+              </p>
+            )}
+          </SectionCard>
+        )}
+
+        {/* ══════ TAB: COURSES ════════════════════ */}
+        {activeTab === 'courses' && (
+          <SectionCard theme={theme} accentColor="#6366f1">
+            <SectionTitle label="Enrolled Courses" theme={theme} color="#6366f1" />
+            {enrolledCourses.length > 0 ? (
+              <div className="space-y-4">
+                {enrolledCourses.map(item => {
+                  const course = item.course;
+                  const pct = Math.round(item.progress || 0);
+                  return (
+                    <Link key={item.id} to={`/courses/${course.id}`}
+                      className={`flex flex-col sm:flex-row gap-4 p-5 rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-md
+                        ${theme === 'dark' 
+                          ? 'bg-white/[0.02] border-white/[0.06] hover:border-[#6366f1]/40' 
+                          : 'bg-white border-gray-100 hover:border-[#6366f1]/40'
+                        }`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-[#6366f1] mb-1 block">
+                          Course
+                        </span>
+                        <h4 className={`font-bold text-sm mb-1 line-clamp-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {course.title}
+                        </h4>
+                        <p className={`text-xs line-clamp-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                          {course.description}
+                        </p>
+                      </div>
+                      
+                      <div className="w-full sm:w-36 flex-shrink-0 flex flex-col justify-center">
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className={`text-[10px] font-semibold uppercase tracking-widest ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                            Progress
+                          </span>
+                          <span className="text-xs font-black text-[#6366f1]">{pct}%</span>
+                        </div>
+                        <div className={`h-1.5 rounded-full overflow-hidden ${theme === 'dark' ? 'bg-white/[0.06]' : 'bg-gray-100'}`}>
+                          <div className="h-full bg-[#6366f1] rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className={`text-sm italic ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>
+                You are not enrolled in any courses yet.
+              </p>
+            )}
+          </SectionCard>
         )}
 
         {/* ── Floating Save Bar (edit mode) ─── */}
