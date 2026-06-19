@@ -109,8 +109,29 @@ def startup_event():
             name='Sync Telegram Post Deletions',
             replace_existing=True
         )
+        
+        def poll_telegram_bot_background():
+            from .routers.guardian import bot_poll
+            db = SessionLocal()
+            try:
+                bot_poll(db)
+            except Exception as e:
+                print(f"❌ [AUTO-SYNC] Ошибка поллинга бота: {e}")
+            finally:
+                db.close()
+
+        scheduler.add_job(
+            poll_telegram_bot_background,
+            'interval',
+            seconds=5,
+            id='poll_telegram_bot',
+            name='Poll Telegram Bot',
+            replace_existing=True
+        )
+        
         scheduler.start()
         print("\n🤖 [SCHEDULER] ✅ Запущена проверка удаленных постов (раз в час)")
+        print("🤖 [SCHEDULER] ✅ Запущен фоновый поллинг Telegram бота (каждые 5 сек)")
         print("💡 Для ручной проверки: POST /api/telegram/sync-deletions")
         atexit.register(lambda: scheduler.shutdown())
 
