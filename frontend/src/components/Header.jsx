@@ -90,11 +90,11 @@ export default function Header({ studentId, setStudentId }) {
     const textClass = isActive
       ? (theme === 'dark' ? 'text-white font-bold' : 'text-gray-900 font-bold')
       : (theme === 'dark' ? 'text-gray-400 hover:text-white font-medium' : 'text-gray-500 hover:text-gray-900 font-medium');
-      
+
     const indicatorClass = isActive
       ? 'after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-[#3cc5e0] after:to-[#20c0a0] after:scale-x-100'
       : 'after:absolute after:-bottom-1.5 after:left-0 after:right-0 after:h-[2px] after:bg-gradient-to-r after:from-[#3cc5e0] after:to-[#20c0a0] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-center';
-      
+
     return `relative transition-colors duration-200 py-1 ${textClass} ${indicatorClass}`;
   };
 

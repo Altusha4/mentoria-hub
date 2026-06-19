@@ -25,9 +25,8 @@ function AppContent({ studentId, setStudentId, handleLogout }) {
   const showFooter = studentId && location.pathname !== '/profile';
 
   return (
-    <div className={`flex flex-col min-h-screen transition-colors duration-300 ${
-      theme === 'dark' ? 'bg-[#060d18] text-white' : 'bg-white text-gray-900'
-    }`}>
+    <div className={`flex flex-col min-h-screen transition-colors duration-300 ${theme === 'dark' ? 'bg-[#060d18] text-white' : 'bg-white text-gray-900'
+      }`}>
       {studentId && <Header studentId={studentId} setStudentId={() => handleLogout()} />}
 
       <main className="flex-1">
